@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from "express";
+
 import { verifyToken } from "../shared/utils/jwt";
+
 import { UnauthorizedError } from "../shared/errors/unauthorized";
 
 export function authMiddleware(
