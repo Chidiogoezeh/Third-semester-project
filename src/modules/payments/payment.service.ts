@@ -50,6 +50,32 @@ export class PaymentService {
       );
     }
 
+    const event = JSON.parse(payload);
+
+    if (
+      event.event === "charge.success"
+    ) {
+      const reference =
+        event.data.reference;
+
+      await repository.updateStatus(
+        reference,
+        "SUCCESS"
+      );
+    }
+
+    if (
+      event.event === "charge.failed"
+    ) {
+      const reference =
+        event.data.reference;
+
+      await repository.updateStatus(
+        reference,
+        "FAILED"
+      );
+    }
+
     return {
       verified: true
     };
