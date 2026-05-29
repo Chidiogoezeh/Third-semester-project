@@ -2,11 +2,9 @@ import crypto from "crypto";
 
 import { TicketRepository } from "./ticket.repository";
 
+import { BadRequestError } from "../../shared/errors/badRequest";
+
 import { ConflictError } from "../../shared/errors/conflict";
-
-import { NotFoundError } from "../../shared/errors/notFound";
-
-import { prisma } from "../../config/database";
 
 const repository = new TicketRepository();
 
@@ -15,18 +13,6 @@ export class TicketService {
     eventId: string,
     eventeeId: string
   ) {
-    const event = await prisma.event.findUnique({
-      where: {
-        id: eventId
-      }
-    });
-
-    if (!event) {
-      throw new NotFoundError(
-        "Event not found"
-      );
-    }
-
     return repository.create({
       eventId,
       eventeeId,
@@ -38,10 +24,12 @@ export class TicketService {
     ticketToken: string
   ) {
     const ticket =
-      await repository.findByToken(ticketToken);
+      await repository.findByToken(
+        ticketToken
+      );
 
     if (!ticket) {
-      throw new NotFoundError(
+      throw new BadRequestError(
         "Invalid ticket"
       );
     }
@@ -52,6 +40,8 @@ export class TicketService {
       );
     }
 
-    return repository.markAsScanned(ticket.id);
+    return repository.markAsScanned(
+      ticket.id
+    );
   }
 }
