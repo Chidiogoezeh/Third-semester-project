@@ -16,9 +16,10 @@ export class AuthService {
     password: string;
     role: "CREATOR" | "EVENTEE";
   }) {
-    const existingUser = await repository.findByEmail(
-      data.email
-    );
+    const existingUser =
+      await repository.findByEmail(
+        data.email
+      );
 
     if (existingUser) {
       throw new BadRequestError(
@@ -26,24 +27,32 @@ export class AuthService {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(
-      data.password,
-      env.BCRYPT_SALT_ROUNDS
-    );
+    const hashedPassword =
+      await bcrypt.hash(
+        data.password,
+        env.BCRYPT_SALT_ROUNDS
+      );
 
-    const user = await repository.createUser({
-      ...data,
-      password: hashedPassword
-    });
+    const user =
+      await repository.createUser({
+        ...data,
+        password: hashedPassword
+      });
 
     const token = generateToken({
       userId: user.id,
       role: user.role
     });
 
+    // REMOVE PASSWORD
+    const {
+      password,
+      ...safeUser
+    } = user;
+
     return {
       token,
-      user
+      user: safeUser
     };
   }
 
@@ -51,9 +60,10 @@ export class AuthService {
     email: string;
     password: string;
   }) {
-    const user = await repository.findByEmail(
-      data.email
-    );
+    const user =
+      await repository.findByEmail(
+        data.email
+      );
 
     if (!user) {
       throw new BadRequestError(
@@ -61,10 +71,11 @@ export class AuthService {
       );
     }
 
-    const isPasswordValid = await bcrypt.compare(
-      data.password,
-      user.password
-    );
+    const isPasswordValid =
+      await bcrypt.compare(
+        data.password,
+        user.password
+      );
 
     if (!isPasswordValid) {
       throw new BadRequestError(
@@ -77,9 +88,15 @@ export class AuthService {
       role: user.role
     });
 
+    // REMOVE PASSWORD
+    const {
+      password,
+      ...safeUser
+    } = user;
+
     return {
       token,
-      user
+      user: safeUser
     };
   }
 }

@@ -16,13 +16,24 @@ export class UserService {
       );
     }
 
-    return user;
+    const { password, ...safeUser } =
+      user;
+
+    return safeUser;
   }
 
   async updateProfile(
     id: string,
     data: any
   ) {
-    return repository.update(id, data);
+    const updatedUser =
+      await repository.update(id, data);
+
+    const {
+      password,
+      ...safeUser
+    } = updatedUser;
+
+    return safeUser;
   }
 }

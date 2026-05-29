@@ -2,10 +2,10 @@ import { Router } from "express";
 
 const router = Router();
 
-router.post("/", (_req, res) => {
-  return res.status(201).json({
+router.get("/", (_req, res) => {
+  res.status(200).json({
     success: true,
-    message: "Reminder created"
+    message: "Healthy"
   });
 });
 

@@ -29,7 +29,7 @@ export class PaymentController {
   ) => {
     const result =
       await service.verifyWebhook(
-        JSON.stringify(req.body),
+        req.body.toString(),
         req.headers[
           "x-paystack-signature"
         ] as string

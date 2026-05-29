@@ -1,20 +1,22 @@
 import { Router } from "express";
 
-import { ReminderController } from "./reminder.controller";
+import { AnalyticsController } from "./analytics.controller";
 
 import { authMiddleware } from "../../middleware/auth.middleware";
+
+import { roleMiddleware } from "../../middleware/role.middleware";
 
 import { asyncHandler } from "../../shared/utils/asyncHandler";
 
 const router = Router();
 
-const controller =
-  new ReminderController();
+const controller = new AnalyticsController();
 
-router.post(
-  "/:id",
+router.get(
+  "/dashboard",
   authMiddleware,
-  asyncHandler(controller.create)
+  roleMiddleware("CREATOR"),
+  asyncHandler(controller.dashboard)
 );
 
 export default router;

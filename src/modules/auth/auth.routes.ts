@@ -9,6 +9,8 @@ import {
   registerSchema
 } from "./auth.validation";
 
+import { asyncHandler } from "../../shared/utils/asyncHandler";
+
 const router = Router();
 
 const controller = new AuthController();
@@ -16,13 +18,13 @@ const controller = new AuthController();
 router.post(
   "/register",
   validate(registerSchema),
-  controller.register
+  asyncHandler(controller.register)
 );
 
 router.post(
   "/login",
   validate(loginSchema),
-  controller.login
+  asyncHandler(controller.login)
 );
 
 export default router;
