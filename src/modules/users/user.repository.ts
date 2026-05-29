@@ -3,10 +3,16 @@ import { prisma } from "../../config/database";
 export class UserRepository {
   async findById(id: string) {
     return prisma.user.findUnique({
-      where: {
-        id
-      }
-    });
+        where: {
+          id
+        },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          createdAt: true
+        }
+      });
   }
 
   async update(

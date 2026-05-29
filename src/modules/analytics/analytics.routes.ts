@@ -10,7 +10,8 @@ import { asyncHandler } from "../../shared/utils/asyncHandler";
 
 const router = Router();
 
-const controller = new AnalyticsController();
+const controller =
+  new AnalyticsController();
 
 router.get(
   "/dashboard",
