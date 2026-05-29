@@ -1,10 +1,12 @@
 import crypto from "crypto";
 
+import {
+  Prisma
+} from "@prisma/client";
+
 import { prisma } from "../../config/database";
 
 import { TicketRepository } from "./ticket.repository";
-
-import { EventRepository } from "../events/event.repository";
 
 import { BadRequestError } from "../../shared/errors/badRequest";
 
@@ -12,9 +14,6 @@ import { ConflictError } from "../../shared/errors/conflict";
 
 const repository =
   new TicketRepository();
-
-const eventRepository =
-  new EventRepository();
 
 export class TicketService {
   async bookTicket(
@@ -27,9 +26,6 @@ export class TicketService {
           await tx.event.findUnique({
             where: {
               id: eventId
-            },
-            include: {
-              creator: true
             }
           });
 
@@ -110,6 +106,10 @@ export class TicketService {
           });
 
         return ticket;
+      },
+      {
+        isolationLevel:
+          Prisma.TransactionIsolationLevel.Serializable
       }
     );
   }
