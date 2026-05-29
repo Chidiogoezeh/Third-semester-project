@@ -47,4 +47,12 @@ export class EventRepository {
       }
     });
   }
+
+  async countTickets(eventId: string) {
+    return prisma.ticket.count({
+      where: {
+        eventId
+      }
+    });
+  }
 }

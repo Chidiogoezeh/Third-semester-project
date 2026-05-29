@@ -66,6 +66,8 @@ model Ticket {
   eventee     User     @relation(fields: [eventeeId], references: [id], onDelete: Cascade)
   payment     Payment?
 
+  @@unique([eventId, eventeeId])
+
   @@map("tickets")
 }
 

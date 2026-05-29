@@ -1,23 +1,117 @@
 import crypto from "crypto";
 
+import { prisma } from "../../config/database";
+
 import { TicketRepository } from "./ticket.repository";
+
+import { EventRepository } from "../events/event.repository";
 
 import { BadRequestError } from "../../shared/errors/badRequest";
 
 import { ConflictError } from "../../shared/errors/conflict";
 
-const repository = new TicketRepository();
+const repository =
+  new TicketRepository();
+
+const eventRepository =
+  new EventRepository();
 
 export class TicketService {
   async bookTicket(
     eventId: string,
     eventeeId: string
   ) {
-    return repository.create({
-      eventId,
-      eventeeId,
-      ticketToken: crypto.randomUUID()
-    });
+    return prisma.$transaction(
+      async (tx) => {
+        const event =
+          await tx.event.findUnique({
+            where: {
+              id: eventId
+            },
+            include: {
+              creator: true
+            }
+          });
+
+        if (!event) {
+          throw new BadRequestError(
+            "Event not found"
+          );
+        }
+
+        if (
+          new Date(event.eventDate) <
+          new Date()
+        ) {
+          throw new BadRequestError(
+            "Cannot book past events"
+          );
+        }
+
+        if (
+          event.creatorId ===
+          eventeeId
+        ) {
+          throw new ConflictError(
+            "Creators cannot book their own events"
+          );
+        }
+
+        const existingTicket =
+          await tx.ticket.findFirst({
+            where: {
+              eventId,
+              eventeeId
+            }
+          });
+
+        if (existingTicket) {
+          throw new ConflictError(
+            "Ticket already booked"
+          );
+        }
+
+        if (event.capacity) {
+          const soldTickets =
+            await tx.ticket.count({
+              where: {
+                eventId
+              }
+            });
+
+          if (
+            soldTickets >=
+            event.capacity
+          ) {
+            throw new ConflictError(
+              "Event is sold out"
+            );
+          }
+        }
+
+        const ticket =
+          await tx.ticket.create({
+            data: {
+              eventId,
+              eventeeId,
+              ticketToken:
+                crypto.randomUUID()
+            },
+            include: {
+              event: true,
+              eventee: {
+                select: {
+                  id: true,
+                  email: true,
+                  role: true
+                }
+              }
+            }
+          });
+
+        return ticket;
+      }
+    );
   }
 
   async verifyTicket(
