@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: eventful-api
+    runtime: node
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 22

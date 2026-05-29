@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CREATOR
+  EVENTEE
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  events     Event[]
+  tickets    Ticket[]
+  reminders  Reminder[]
+
+  @@map("users")
+}
+
+model Event {
+  id               String   @id @default(uuid())
+  creatorId        String
+  title            String
+  slug             String   @unique
+  description      String
+  bannerUrl        String?
+  location         String
+  price            Int
+  capacity         Int?
+  eventDate        DateTime
+  reminderWindow   Int      @default(24)
+  createdAt        DateTime @default(now())
+
+  creator          User      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  tickets          Ticket[]
+  reminders        Reminder[]
+
+  @@map("events")
+}
+
+model Ticket {
+  id          String   @id @default(uuid())
+  eventId     String
+  eventeeId   String
+  ticketToken String   @unique
+  isScanned   Boolean  @default(false)
+  scannedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventee     User     @relation(fields: [eventeeId], references: [id], onDelete: Cascade)
+  payment     Payment?
+
+  @@map("tickets")
+}
+
+model Payment {
+  id        String        @id @default(uuid())
+  ticketId  String?       @unique
+  reference String        @unique
+  amount    Int
+  status    PaymentStatus @default(PENDING)
+  paidAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  ticket Ticket? @relation(
+  fields: [ticketId],
+  references: [id],
+  onDelete: Cascade
+)
+
+  @@map("payments")
+}
+
+model Reminder {
+  id               String   @id @default(uuid())
+  eventId          String
+  userId           String
+  reminderOffset   Int
+  createdAt        DateTime @default(now())
+
+  event            Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user             User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reminders")
+}
