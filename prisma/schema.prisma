@@ -16,6 +16,8 @@ enum PaymentStatus {
   PENDING
   SUCCESS
   FAILED
+  ABANDONED
+  REFUNDED
 }
 
 model User {
@@ -25,79 +27,167 @@ model User {
   role      Role
   createdAt DateTime @default(now())
 
+  // Relations
   events     Event[]
   tickets    Ticket[]
   reminders  Reminder[]
+  payments   Payment[]
 
   @@map("users")
 }
 
 model Event {
-  id               String   @id @default(uuid())
-  creatorId        String
-  title            String
-  slug             String   @unique
-  description      String
-  bannerUrl        String?
-  location         String
-  price            Int
-  capacity         Int?
-  eventDate        DateTime
-  reminderWindow   Int      @default(24)
-  createdAt        DateTime @default(now())
+  id             String   @id @default(uuid())
+  creatorId      String
 
-  creator          User      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  tickets          Ticket[]
-  reminders        Reminder[]
+  title          String
+  slug           String   @unique
+  description    String
+  bannerUrl      String?
 
-  @@map("events")
-}
+  location       String
 
-model Ticket {
-  id          String   @id @default(uuid())
-  eventId     String
-  eventeeId   String
-  ticketToken String   @unique
-  isScanned   Boolean  @default(false)
-  scannedAt   DateTime?
-  createdAt   DateTime @default(now())
+  // Amount in kobo/cents
+  price          Int
 
-  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventee     User     @relation(fields: [eventeeId], references: [id], onDelete: Cascade)
-  payment     Payment?
+  capacity       Int?
 
-  @@unique([eventId, eventeeId])
+  eventDate      DateTime
 
-  @@map("tickets")
-}
+  // Hours before event
+  reminderWindow Int      @default(24)
 
-model Payment {
-  id        String        @id @default(uuid())
-  ticketId  String        @unique
-  reference String        @unique
-  amount    Int
-  status    PaymentStatus @default(PENDING)
-  paidAt    DateTime?
-  createdAt DateTime      @default(now())
+  createdAt      DateTime @default(now())
 
-  ticket Ticket @relation(
-    fields: [ticketId],
+  // Relations
+  creator        User       @relation(
+    fields: [creatorId],
     references: [id],
     onDelete: Cascade
   )
 
+  tickets        Ticket[]
+  reminders      Reminder[]
+  payments       Payment[]
+
+  @@index([creatorId])
+
+  @@map("events")
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+
+  eventId    String
+  eventeeId  String
+
+  // Paystack transaction reference
+  reference  String        @unique
+
+  // Amount in kobo
+  amount     Int
+
+  status     PaymentStatus @default(PENDING)
+
+  paidAt     DateTime?
+
+  createdAt  DateTime      @default(now())
+
+  // Relations
+  event      Event @relation(
+    fields: [eventId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  eventee    User @relation(
+    fields: [eventeeId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  // One successful payment => one ticket
+  ticket     Ticket?
+
+  @@index([eventId])
+  @@index([eventeeId])
+  @@index([status])
+
   @@map("payments")
 }
 
-model Reminder {
-  id               String   @id @default(uuid())
-  eventId          String
-  userId           String
-  reminderOffset   Int
-  createdAt        DateTime @default(now())
+model Ticket {
+  id           String   @id @default(uuid())
 
-  event            Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user             User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId      String
+  eventeeId    String
+
+  // Links ticket to successful payment
+  paymentId    String   @unique
+
+  // QR code payload / verification token
+  ticketToken  String   @unique
+
+  isScanned    Boolean  @default(false)
+
+  scannedAt    DateTime?
+
+  createdAt    DateTime @default(now())
+
+  // Relations
+  event        Event @relation(
+    fields: [eventId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  eventee      User @relation(
+    fields: [eventeeId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  payment      Payment @relation(
+    fields: [paymentId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  // One ticket per user per event
+  @@unique([eventId, eventeeId])
+
+  @@index([eventId])
+  @@index([eventeeId])
+
+  @@map("tickets")
+}
+
+model Reminder {
+  id              String   @id @default(uuid())
+
+  eventId         String
+  userId          String
+
+  // Hours before event
+  reminderOffset  Int
+
+  createdAt       DateTime @default(now())
+
+  // Relations
+  event           Event @relation(
+    fields: [eventId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  user            User @relation(
+    fields: [userId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  @@index([eventId])
+  @@index([userId])
 
   @@map("reminders")
 }

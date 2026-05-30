@@ -1,5 +1,7 @@
 import crypto from "crypto";
 
+import { prisma } from "../../config/database";
+
 import { PaymentRepository } from "./payment.repository";
 
 import { WebhookService } from "./webhook.service";
@@ -11,26 +13,39 @@ const repository = new PaymentRepository();
 const webhookService = new WebhookService();
 
 export class PaymentService {
-  async initializePayment(data: {
-    ticketId: string;
-    amount: number;
-  }) {
+  async createBookingSession(
+    eventId: string,
+    eventeeId: string
+  ) {
+    const event = await prisma.event.findUnique({
+      where: {
+        id: eventId
+      }
+    });
+
+    if (!event) {
+      throw new BadRequestError(
+        "Event not found"
+      );
+    }
+
     const reference =
       crypto.randomUUID();
 
     const payment =
       await repository.create({
-        ticketId: data.ticketId,
-        amount: data.amount,
+        eventId,
+        eventeeId,
+        amount: event.price,
         reference,
         status: "PENDING"
       });
 
     return {
-      payment,
+      paymentId: payment.id,
+      reference,
       authorizationUrl:
-        "https://checkout.paystack.com",
-      reference
+        "https://checkout.paystack.com"
     };
   }
 
@@ -53,49 +68,38 @@ export class PaymentService {
     const event = JSON.parse(payload);
 
     if (
-      event.event === "charge.success"
+      event.event !== "charge.success"
     ) {
-      const reference =
-        event.data.reference;
+      return {
+        verified: true
+      };
+    }
 
-      await repository.updateStatus(
-        reference,
-        "SUCCESS"
+    const reference =
+      event.data.reference;
+
+    const payment =
+      await repository.findByReference(
+        reference
+      );
+
+    if (!payment) {
+      throw new BadRequestError(
+        "Payment not found"
       );
     }
 
-    if (
-      event.event === "charge.failed"
-    ) {
-      const reference =
-        event.data.reference;
+    await repository.updateStatus(
+      reference,
+      "SUCCESS"
+    );
 
-      await repository.updateStatus(
-        reference,
-        "FAILED"
-      );
-    }
+    // Ticket creation belongs here
+    // QR generation belongs here
+    // Reminder scheduling belongs here
 
     return {
       verified: true
     };
-  }
-
-  async markPaymentSuccessful(
-    reference: string
-  ) {
-    return repository.updateStatus(
-      reference,
-      "SUCCESS"
-    );
-  }
-
-  async markPaymentFailed(
-    reference: string
-  ) {
-    return repository.updateStatus(
-      reference,
-      "FAILED"
-    );
   }
 }
