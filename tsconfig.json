@@ -4,7 +4,7 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -13,9 +13,7 @@
   },
   "include": [
     "src",
-    "tests",
-    "prisma",
-    "docs"
+    "tests"
   ],
   "exclude": ["node_modules", "dist"]
 }

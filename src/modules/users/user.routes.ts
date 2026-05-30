@@ -8,6 +8,8 @@ import { validate } from "../../middleware/validate.middleware";
 
 import { updateUserSchema } from "./user.validation";
 
+import { asyncHandler } from "../../shared/utils/asyncHandler";
+
 const router = Router();
 
 const controller =
@@ -16,14 +18,14 @@ const controller =
 router.get(
   "/me",
   authMiddleware,
-  controller.profile
+  asyncHandler(controller.profile)
 );
 
 router.patch(
   "/me",
   authMiddleware,
   validate(updateUserSchema),
-  controller.update
+  asyncHandler(controller.update)
 );
 
 export default router;

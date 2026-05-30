@@ -1,47 +1,43 @@
-import crypto from "crypto";
+import { Request, Response } from "express";
 
-import { TicketRepository } from "./ticket.repository";
+import { TicketService } from "./ticket.service";
 
-import { BadRequestError } from "../../shared/errors/badRequest";
+import { successResponse } from "../../shared/utils/response";
 
-import { ConflictError } from "../../shared/errors/conflict";
-
-const repository = new TicketRepository();
+const service = new TicketService();
 
 export class TicketController {
-  async bookTicket(
-    eventId: string,
-    eventeeId: string
-  ) {
-    return repository.create({
-      eventId,
-      eventeeId,
-      ticketToken: crypto.randomUUID()
-    });
-  }
-
-  async verifyTicket(
-    ticketToken: string
-  ) {
-    const ticket =
-      await repository.findByToken(
-        ticketToken
+  book = async (
+    req: Request<{ id: string }>,
+    res: Response
+  ) => {
+    const result =
+      await service.bookTicket(
+        req.params.id,
+        req.user!.userId
       );
 
-    if (!ticket) {
-      throw new BadRequestError(
-        "Invalid ticket"
-      );
-    }
-
-    if (ticket.isScanned) {
-      throw new ConflictError(
-        "Ticket already scanned"
-      );
-    }
-
-    return repository.markAsScanned(
-      ticket.id
+    return successResponse(
+      res,
+      "Ticket booked successfully",
+      result,
+      201
     );
-  }
+  };
+
+  verify = async (
+    req: Request,
+    res: Response
+  ) => {
+    const result =
+      await service.verifyTicket(
+        req.body.ticketToken
+      );
+
+    return successResponse(
+      res,
+      "Ticket verified successfully",
+      result
+    );
+  };
 }

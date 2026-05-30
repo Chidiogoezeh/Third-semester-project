@@ -12,17 +12,14 @@ export class AnalyticsService {
         creatorId
       );
 
+    const revenue =
+      await repository.getSuccessfulRevenue(
+        creatorId
+      );
+
     const ticketsSold = events.reduce(
       (acc, event) =>
         acc + event.tickets.length,
-      0
-    );
-
-    const revenue = events.reduce(
-      (acc, event) =>
-        acc +
-        event.tickets.length *
-          event.price,
       0
     );
 

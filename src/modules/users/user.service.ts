@@ -16,24 +16,22 @@ export class UserService {
       );
     }
 
-    const { password, ...safeUser } =
-      user;
-
-    return safeUser;
+    return user;
   }
 
-  async updateProfile(
+  async update(
     id: string,
     data: any
   ) {
-    const updatedUser =
-      await repository.update(id, data);
-
-    const {
-      password,
-      ...safeUser
-    } = updatedUser;
-
-    return safeUser;
+    return prisma.user.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        createdAt: true
+      }
+    });
   }
 }

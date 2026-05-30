@@ -73,18 +73,18 @@ model Ticket {
 
 model Payment {
   id        String        @id @default(uuid())
-  ticketId  String?       @unique
+  ticketId  String        @unique
   reference String        @unique
   amount    Int
   status    PaymentStatus @default(PENDING)
   paidAt    DateTime?
   createdAt DateTime      @default(now())
 
-  ticket Ticket? @relation(
-  fields: [ticketId],
-  references: [id],
-  onDelete: Cascade
-)
+  ticket Ticket @relation(
+    fields: [ticketId],
+    references: [id],
+    onDelete: Cascade
+  )
 
   @@map("payments")
 }

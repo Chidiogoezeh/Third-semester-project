@@ -13,4 +13,25 @@ export class AnalyticsRepository {
       }
     });
   }
+
+  async getSuccessfulRevenue(
+    creatorId: string
+  ) {
+    const result =
+      await prisma.payment.aggregate({
+        _sum: {
+          amount: true
+        },
+        where: {
+          status: "SUCCESS",
+          ticket: {
+            event: {
+              creatorId
+            }
+          }
+        }
+      });
+
+    return result._sum.amount ?? 0;
+  }
 }

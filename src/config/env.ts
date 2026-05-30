@@ -21,9 +21,11 @@ export const env = {
 
   JWT_SECRET: getEnv("JWT_SECRET"),
 
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "1d",
+  JWT_EXPIRES_IN:
+    process.env.JWT_EXPIRES_IN ?? "1d",
 
-  BCRYPT_SALT_ROUNDS: Number(process.env.BCRYPT_SALT_ROUNDS) || 12,
+  BCRYPT_SALT_ROUNDS:
+    Number(process.env.BCRYPT_SALT_ROUNDS) || 12,
 
   PAYSTACK_SECRET_KEY: getEnv("PAYSTACK_SECRET_KEY"),
 

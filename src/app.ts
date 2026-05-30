@@ -33,13 +33,6 @@ app.use(pinoHttp());
 
 app.use(apiLimiter);
 
-app.use(
-  "/api/v1/payments/webhook",
-  express.raw({
-    type: "application/json"
-  })
-);
-
 app.use(express.json());
 
 app.get("/", (_req, res) => {

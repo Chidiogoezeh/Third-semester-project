@@ -1,4 +1,4 @@
-import { Router } from "express";
+import express, { Router } from "express";
 
 import { PaymentController } from "./payment.controller";
 
@@ -16,6 +16,9 @@ router.post(
 
 router.post(
   "/webhook",
+  express.raw({
+    type: "application/json"
+  }),
   asyncHandler(controller.webhook)
 );
 
