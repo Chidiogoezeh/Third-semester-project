@@ -10,16 +10,13 @@ const controller =
   new PaymentController();
 
 router.post(
-  "/initialize",
-  asyncHandler(controller.initialize)
-);
-
-router.post(
   "/webhook",
   express.raw({
     type: "application/json"
   }),
-  asyncHandler(controller.webhook)
+  asyncHandler(
+    controller.webhook
+  )
 );
 
 export default router;

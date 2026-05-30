@@ -3,16 +3,13 @@ import { Router } from "express";
 import { EventController } from "./event.controller";
 
 import { authMiddleware } from "../../middleware/auth.middleware";
-
 import { roleMiddleware } from "../../middleware/role.middleware";
-
 import { validate } from "../../middleware/validate.middleware";
 
 import { createEventSchema } from "./event.validation";
 
-import { TicketController } from "../tickets/ticket.controller";
-
 import { ReminderController } from "../reminders/reminder.controller";
+import { PaymentController } from "../payments/payment.controller";
 
 import { asyncHandler } from "../../shared/utils/asyncHandler";
 
@@ -20,10 +17,11 @@ const router = Router();
 
 const controller = new EventController();
 
-const ticketController = new TicketController();
-
 const reminderController =
   new ReminderController();
+
+const paymentController =
+  new PaymentController();
 
 router.get(
   "/",
@@ -54,7 +52,9 @@ router.post(
   "/:id/book",
   authMiddleware,
   roleMiddleware("EVENTEE"),
-  asyncHandler(ticketController.book)
+  asyncHandler(
+    paymentController.initializeBooking
+  )
 );
 
 router.post(

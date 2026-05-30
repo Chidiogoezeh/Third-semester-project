@@ -1,9 +1,5 @@
 import crypto from "crypto";
 
-import {
-  Prisma
-} from "@prisma/client";
-
 import { prisma } from "../../config/database";
 
 import { TicketRepository } from "./ticket.repository";
@@ -16,102 +12,46 @@ const repository =
   new TicketRepository();
 
 export class TicketService {
-  async bookTicket(
-    eventId: string,
-    eventeeId: string
+  async createFromPayment(
+    paymentId: string
   ) {
-    return prisma.$transaction(
-      async (tx) => {
-        const event =
-          await tx.event.findUnique({
-            where: {
-              id: eventId
-            }
-          });
-
-        if (!event) {
-          throw new BadRequestError(
-            "Event not found"
-          );
+    const payment =
+      await prisma.payment.findUnique({
+        where: {
+          id: paymentId
+        },
+        include: {
+          event: true,
+          eventee: true,
+          ticket: true
         }
+      });
 
-        if (
-          new Date(event.eventDate) <
-          new Date()
-        ) {
-          throw new BadRequestError(
-            "Cannot book past events"
-          );
-        }
+    if (!payment) {
+      throw new BadRequestError(
+        "Payment not found"
+      );
+    }
 
-        if (
-          event.creatorId ===
-          eventeeId
-        ) {
-          throw new ConflictError(
-            "Creators cannot book their own events"
-          );
-        }
+    if (
+      payment.status !== "SUCCESS"
+    ) {
+      throw new BadRequestError(
+        "Payment not successful"
+      );
+    }
 
-        const existingTicket =
-          await tx.ticket.findFirst({
-            where: {
-              eventId,
-              eventeeId
-            }
-          });
+    if (payment.ticket) {
+      return payment.ticket;
+    }
 
-        if (existingTicket) {
-          throw new ConflictError(
-            "Ticket already booked"
-          );
-        }
-
-        if (event.capacity) {
-          const soldTickets =
-            await tx.ticket.count({
-              where: {
-                eventId
-              }
-            });
-
-          if (
-            soldTickets >=
-            event.capacity
-          ) {
-            throw new ConflictError(
-              "Event is sold out"
-            );
-          }
-        }
-
-        const ticket =
-          await tx.ticket.create({
-            data: {
-              eventId,
-              eventeeId,
-              ticketToken:
-                crypto.randomUUID()
-            },
-            include: {
-              event: true,
-              eventee: {
-                select: {
-                  id: true,
-                  email: true,
-                  role: true
-                }
-              }
-            }
-          });
-
-        return ticket;
-      },
-      {
-        isolationLevel:
-          Prisma.TransactionIsolationLevel.Serializable
-      }
-    );
+    return repository.create({
+      eventId: payment.eventId,
+      eventeeId: payment.eventeeId,
+      paymentId: payment.id,
+      ticketToken:
+        crypto.randomUUID()
+    });
   }
 
   async verifyTicket(

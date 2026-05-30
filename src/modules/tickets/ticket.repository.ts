@@ -1,13 +1,21 @@
 import { prisma } from "../../config/database";
 
+import {
+  Prisma
+} from "@prisma/client";
+
 export class TicketRepository {
-  async create(data: any) {
+  async create(
+    data: Prisma.TicketCreateInput
+  ) {
     return prisma.ticket.create({
       data
     });
   }
 
-  async findByToken(ticketToken: string) {
+  async findByToken(
+    ticketToken: string
+  ) {
     return prisma.ticket.findUnique({
       where: {
         ticketToken
@@ -15,7 +23,9 @@ export class TicketRepository {
     });
   }
 
-  async markAsScanned(id: string) {
+  async markAsScanned(
+    id: string
+  ) {
     return prisma.ticket.update({
       where: {
         id

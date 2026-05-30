@@ -7,18 +7,19 @@ import { successResponse } from "../../shared/utils/response";
 const service = new PaymentService();
 
 export class PaymentController {
-  initialize = async (
-    req: Request,
+  initializeBooking = async (
+    req: Request<{ id: string }>,
     res: Response
   ) => {
     const result =
-      await service.initializePayment(
-        req.body
+      await service.createBookingSession(
+        req.params.id,
+        req.user!.userId
       );
 
     return successResponse(
       res,
-      "Payment initialized",
+      "Checkout initialized",
       result
     );
   };
@@ -27,13 +28,15 @@ export class PaymentController {
     req: Request,
     res: Response
   ) => {
-    const payload = Buffer.isBuffer(req.body)
+    const payload = Buffer.isBuffer(
+      req.body
+    )
       ? req.body.toString("utf8")
       : JSON.stringify(req.body);
 
     const result =
       await service.verifyWebhook(
-        req.body.toString("utf8"),
+        payload,
         req.headers[
           "x-paystack-signature"
         ] as string
