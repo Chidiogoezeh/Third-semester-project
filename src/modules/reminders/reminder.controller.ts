@@ -11,13 +11,17 @@ export class ReminderController {
     req: Request,
     res: Response
   ) => {
-    const result =
-      await service.createReminder({
-        eventId: req.params.id,
-        userId: req.user!.userId,
-        reminderOffset:
-          req.body.reminderOffset
-      });
+    const eventId = req.params.id;
+
+    if (Array.isArray(eventId)) {
+      throw new Error("Invalid event id");
+    }
+
+    const result = await service.createReminder({
+      eventId,
+      userId: req.user!.userId,
+      reminderOffset: req.body.reminderOffset
+    });
 
     return successResponse(
       res,
