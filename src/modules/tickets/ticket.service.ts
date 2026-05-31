@@ -12,6 +12,27 @@ const repository =
   new TicketRepository();
 
 export class TicketService {
+  async bookTicket(
+    eventId: string,
+    eventeeId: string
+  ) {
+    const event =
+      await prisma.event.findUnique({
+        where: { id: eventId }
+      });
+
+    if (!event) {
+      throw new BadRequestError(
+        "Event not found"
+      );
+    }
+    return {
+      eventId,
+      eventeeId,
+      amount: event.price
+    };
+  }
+
   async createFromPayment(
     paymentId: string
   ) {
