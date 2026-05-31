@@ -60,11 +60,7 @@ model Event {
   createdAt      DateTime @default(now())
 
   // Relations
-  creator        User       @relation(
-    fields: [creatorId],
-    references: [id],
-    onDelete: Cascade
-  )
+  creator User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   tickets        Ticket[]
   reminders      Reminder[]
@@ -94,17 +90,9 @@ model Payment {
   createdAt  DateTime      @default(now())
 
   // Relations
-  event      Event @relation(
-    fields: [eventId],
-    references: [id],
-    onDelete: Cascade
-  )
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
-  eventee    User @relation(
-    fields: [eventeeId],
-    references: [id],
-    onDelete: Cascade
-  )
+  eventee User @relation(fields: [eventeeId], references: [id], onDelete: Cascade)
 
   // One successful payment => one ticket
   ticket     Ticket?
@@ -135,23 +123,11 @@ model Ticket {
   createdAt    DateTime @default(now())
 
   // Relations
-  event        Event @relation(
-    fields: [eventId],
-    references: [id],
-    onDelete: Cascade
-  )
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
-  eventee      User @relation(
-    fields: [eventeeId],
-    references: [id],
-    onDelete: Cascade
-  )
+  eventee User @relation(fields: [eventeeId], references: [id], onDelete: Cascade)
 
-  payment      Payment @relation(
-    fields: [paymentId],
-    references: [id],
-    onDelete: Cascade
-  )
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
   // One ticket per user per event
   @@unique([eventId, eventeeId])
@@ -174,17 +150,9 @@ model Reminder {
   createdAt       DateTime @default(now())
 
   // Relations
-  event           Event @relation(
-    fields: [eventId],
-    references: [id],
-    onDelete: Cascade
-  )
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
-  user            User @relation(
-    fields: [userId],
-    references: [id],
-    onDelete: Cascade
-  )
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
   @@index([userId])
