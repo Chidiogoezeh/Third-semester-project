@@ -2,7 +2,7 @@
 CREATE TYPE "Role" AS ENUM ('CREATOR', 'EVENTEE');
 
 -- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'SUCCESS', 'FAILED');
+CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'SUCCESS', 'FAILED', 'ABANDONED', 'REFUNDED');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -34,22 +34,10 @@ CREATE TABLE "events" (
 );
 
 -- CreateTable
-CREATE TABLE "tickets" (
+CREATE TABLE "payments" (
     "id" TEXT NOT NULL,
     "eventId" TEXT NOT NULL,
     "eventeeId" TEXT NOT NULL,
-    "ticketToken" TEXT NOT NULL,
-    "isScanned" BOOLEAN NOT NULL DEFAULT false,
-    "scannedAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "tickets_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "payments" (
-    "id" TEXT NOT NULL,
-    "ticketId" TEXT NOT NULL,
     "reference" TEXT NOT NULL,
     "amount" INTEGER NOT NULL,
     "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
@@ -57,6 +45,20 @@ CREATE TABLE "payments" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "payments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tickets" (
+    "id" TEXT NOT NULL,
+    "eventId" TEXT NOT NULL,
+    "eventeeId" TEXT NOT NULL,
+    "paymentId" TEXT NOT NULL,
+    "ticketToken" TEXT NOT NULL,
+    "isScanned" BOOLEAN NOT NULL DEFAULT false,
+    "scannedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "tickets_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -77,16 +79,49 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 CREATE UNIQUE INDEX "events_slug_key" ON "events"("slug");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tickets_ticketToken_key" ON "tickets"("ticketToken");
-
--- CreateIndex
-CREATE UNIQUE INDEX "payments_ticketId_key" ON "payments"("ticketId");
+CREATE INDEX "events_creatorId_idx" ON "events"("creatorId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "payments_reference_key" ON "payments"("reference");
 
+-- CreateIndex
+CREATE INDEX "payments_eventId_idx" ON "payments"("eventId");
+
+-- CreateIndex
+CREATE INDEX "payments_eventeeId_idx" ON "payments"("eventeeId");
+
+-- CreateIndex
+CREATE INDEX "payments_status_idx" ON "payments"("status");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tickets_paymentId_key" ON "tickets"("paymentId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tickets_ticketToken_key" ON "tickets"("ticketToken");
+
+-- CreateIndex
+CREATE INDEX "tickets_eventId_idx" ON "tickets"("eventId");
+
+-- CreateIndex
+CREATE INDEX "tickets_eventeeId_idx" ON "tickets"("eventeeId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tickets_eventId_eventeeId_key" ON "tickets"("eventId", "eventeeId");
+
+-- CreateIndex
+CREATE INDEX "reminders_eventId_idx" ON "reminders"("eventId");
+
+-- CreateIndex
+CREATE INDEX "reminders_userId_idx" ON "reminders"("userId");
+
 -- AddForeignKey
 ALTER TABLE "events" ADD CONSTRAINT "events_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "payments" ADD CONSTRAINT "payments_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "events"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "payments" ADD CONSTRAINT "payments_eventeeId_fkey" FOREIGN KEY ("eventeeId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tickets" ADD CONSTRAINT "tickets_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "events"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -95,7 +130,7 @@ ALTER TABLE "tickets" ADD CONSTRAINT "tickets_eventId_fkey" FOREIGN KEY ("eventI
 ALTER TABLE "tickets" ADD CONSTRAINT "tickets_eventeeId_fkey" FOREIGN KEY ("eventeeId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "payments" ADD CONSTRAINT "payments_ticketId_fkey" FOREIGN KEY ("ticketId") REFERENCES "tickets"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "tickets" ADD CONSTRAINT "tickets_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "payments"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "reminders" ADD CONSTRAINT "reminders_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "events"("id") ON DELETE CASCADE ON UPDATE CASCADE;
