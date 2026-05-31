@@ -93,16 +93,8 @@ export class PaymentService {
 
     const payment =
       await repository.create({
-        event: {
-          connect: {
-            id: eventId
-          }
-        },
-        eventee: {
-          connect: {
-            id: eventeeId
-          }
-        },
+        eventId,
+        eventeeId,
         amount: event.price,
         reference,
         status: "PENDING"

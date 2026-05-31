@@ -6,7 +6,7 @@ import {
 
 export class TicketRepository {
   async create(
-    data: Prisma.TicketCreateInput
+    data: Prisma.TicketUncheckedCreateInput
   ) {
     return prisma.ticket.create({
       data

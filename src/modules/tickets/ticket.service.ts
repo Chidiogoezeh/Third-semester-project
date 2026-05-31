@@ -5,7 +5,6 @@ import { prisma } from "../../config/database";
 import { TicketRepository } from "./ticket.repository";
 
 import { BadRequestError } from "../../shared/errors/badRequest";
-
 import { ConflictError } from "../../shared/errors/conflict";
 
 const repository =
@@ -26,6 +25,7 @@ export class TicketService {
         "Event not found"
       );
     }
+
     return {
       eventId,
       eventeeId,
