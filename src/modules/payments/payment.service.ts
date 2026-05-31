@@ -9,6 +9,12 @@ import { NotificationService } from "../notifications/notification.service";
 
 import { BadRequestError } from "../../shared/errors/badRequest";
 
+import { Prisma } from "@prisma/client";
+
+import {
+  generateQRCode
+} from "../../shared/utils/qr";
+
 const repository = new PaymentRepository();
 
 const webhookService = new WebhookService();
@@ -160,10 +166,12 @@ export class PaymentService {
         verified: true
       };
     }
-
+    
     const result =
       await prisma.$transaction(
-        async (tx) => {
+        async (
+          tx: Prisma.TransactionClient
+        ) => {
           const updatedPayment =
             await tx.payment.update({
               where: {
@@ -178,48 +186,41 @@ export class PaymentService {
           const ticket =
             await tx.ticket.create({
               data: {
-                eventId:
-                  payment.eventId,
-                eventeeId:
-                  payment.eventeeId,
-                paymentId:
-                  updatedPayment.id,
+                eventId: payment.eventId,
+                eventeeId: payment.eventeeId,
+                paymentId: updatedPayment.id,
                 ticketToken:
                   crypto.randomUUID()
               }
             });
 
           return {
-            payment:
-              updatedPayment,
+            payment: updatedPayment,
             ticket
           };
         }
       );
 
-    await notificationService.sendPaymentSuccessEmail(
-      {
-        email:
-          payment.eventee.email,
-        amount:
-          payment.amount,
-        eventTitle:
-          payment.event.title
-      }
-    );
+    const qrCode =
+      await generateQRCode(
+        result.ticket.ticketToken
+      );
 
-    await notificationService.sendTicketEmail(
-      {
-        email:
-          payment.eventee.email,
-        eventTitle:
-          payment.event.title,
-        ticketToken:
-          result.ticket.ticketToken,
-        eventDate:
-          payment.event.eventDate
-      }
-    );
+    await notificationService.sendTicketEmail({
+      email:
+        payment.eventee.email,
+
+      eventTitle:
+        payment.event.title,
+
+      qrCode,
+
+      eventDate:
+        payment.event.eventDate,
+
+      location:
+        payment.event.location
+    });
 
     return {
       verified: true
