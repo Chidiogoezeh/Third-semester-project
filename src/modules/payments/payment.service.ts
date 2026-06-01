@@ -11,16 +11,17 @@ import { BadRequestError } from "../../shared/errors/badRequest";
 
 import { Prisma } from "@prisma/client";
 
-import {
-  generateQRCode
-} from "../../shared/utils/qr";
+import {  generateQRCode } from "../../shared/utils/qr";
+
+import { PaystackService } from "./paystack.service";
 
 const repository = new PaymentRepository();
 
 const webhookService = new WebhookService();
 
-const notificationService =
-  new NotificationService();
+const notificationService = new NotificationService();
+
+const paystackService = new PaystackService();
 
 export class PaymentService {
   async createBookingSession(
@@ -91,6 +92,19 @@ export class PaymentService {
     const reference =
       crypto.randomUUID();
 
+    const eventee =
+      await prisma.user.findUnique({
+        where: {
+          id: eventeeId
+        }
+      });
+
+    if (!eventee) {
+      throw new BadRequestError(
+        "User not found"
+      );
+    }
+
     const payment =
       await repository.create({
         eventId,
@@ -100,47 +114,26 @@ export class PaymentService {
         status: "PENDING"
       });
 
-    return {
-      paymentId: payment.id,
-      reference,
+    const checkout =
+      await paystackService.initializeTransaction({
+        email: eventee.email,
+        amount: event.price,
+        reference
+      });
 
-      // Replace with actual Paystack URL
-      authorizationUrl:
-        "https://checkout.paystack.com"
+    return {
+        paymentId: payment.id,
+        reference,
+        authorizationUrl:
+          checkout.authorization_url,
+        accessCode:
+          checkout.access_code
     };
   }
 
-  async verifyWebhook(
-    payload: string,
-    signature: string
+  private async completePayment(
+    reference: string
   ) {
-    const isValid =
-      webhookService.verifySignature(
-        payload,
-        signature
-      );
-
-    if (!isValid) {
-      throw new BadRequestError(
-        "Invalid webhook signature"
-      );
-    }
-
-    const webhookEvent =
-      JSON.parse(payload);
-
-    if (
-      webhookEvent.event !==
-      "charge.success"
-    ) {
-      return {
-        verified: true
-      };
-    }
-
-    const reference =
-      webhookEvent.data.reference;
-
     const payment =
       await repository.findByReference(
         reference
@@ -152,13 +145,17 @@ export class PaymentService {
       );
     }
 
-    // Idempotency guard
-    if (payment.ticket) {
+    // Already processed
+    if (
+      payment.status === "SUCCESS" &&
+      payment.ticket
+    ) {
       return {
-        verified: true
+        ticket: payment.ticket,
+        alreadyProcessed: true
       };
     }
-    
+
     const result =
       await prisma.$transaction(
         async (
@@ -175,16 +172,34 @@ export class PaymentService {
               }
             });
 
-          const ticket =
-            await tx.ticket.create({
-              data: {
-                eventId: payment.eventId,
-                eventeeId: payment.eventeeId,
-                paymentId: updatedPayment.id,
-                ticketToken:
-                  crypto.randomUUID()
+          const existingTicket =
+            await tx.ticket.findUnique({
+              where: {
+                paymentId: payment.id
               }
             });
+
+          if (existingTicket) {
+            return {
+              payment: updatedPayment,
+              ticket: existingTicket
+            };
+          }
+
+          const ticket =
+          await tx.ticket.upsert({
+            where: {
+              paymentId: updatedPayment.id
+            },
+            update: {},
+            create: {
+              eventId: payment.eventId,
+              eventeeId: payment.eventeeId,
+              paymentId: updatedPayment.id,
+              ticketToken:
+                crypto.randomUUID()
+            }
+          });
 
           return {
             payment: updatedPayment,
@@ -193,7 +208,7 @@ export class PaymentService {
         }
       );
 
-    const qrCode =
+    const qrCode = 
       await generateQRCode(
         result.ticket.ticketToken
       );
@@ -215,7 +230,99 @@ export class PaymentService {
     });
 
     return {
+      ticket: result.ticket,
+      alreadyProcessed: false
+    };
+  }
+
+  async verifyWebhook(
+  payload: string,
+  signature: string
+) {
+  const isValid =
+    webhookService.verifySignature(
+      payload,
+      signature
+    );
+
+  if (!isValid) {
+    throw new BadRequestError(
+      "Invalid webhook signature"
+    );
+  }
+
+  const webhookEvent =
+    JSON.parse(payload);
+
+  if (
+    webhookEvent.event !==
+    "charge.success"
+  ) {
+    return {
       verified: true
     };
+  }
+
+  const reference =
+    webhookEvent.data.reference;
+
+  const payment =
+    await repository.findByReference(
+      reference
+    );
+
+  if (!payment) {
+    throw new BadRequestError(
+      "Payment not found"
+    );
+  }
+
+  if (
+    payment.status === "SUCCESS" &&
+    payment.ticket
+  ) {
+    return {
+      verified: true
+    };
+  }
+
+  await this.completePayment(
+    reference
+  );
+
+  return {
+    verified: true
+  };
+}
+  async verifyPayment(
+    reference: string
+  ) {
+    const payment =
+      await repository.findByReference(
+        reference
+      );
+
+    if (!payment) {
+      throw new BadRequestError(
+        "Payment not found"
+      );
+    }
+
+    const verification =
+      await paystackService.verifyTransaction(
+        reference
+      );
+
+    if (
+      verification.status &&
+      verification.data.status ===
+        "success"
+    ) {
+      await this.completePayment(
+        reference
+      );
+    }
+
+    return verification.data;
   }
 }

@@ -4,10 +4,20 @@ import { PaymentController } from "./payment.controller";
 
 import { asyncHandler } from "../../shared/utils/asyncHandler";
 
+import { authMiddleware } from "../../middleware/auth.middleware";
+
 const router = Router();
 
 const controller =
   new PaymentController();
+
+router.post(
+  "/checkout/:id",
+  authMiddleware,
+  asyncHandler(
+    controller.initializeBooking
+  )
+);
 
 router.post(
   "/webhook",
@@ -16,6 +26,13 @@ router.post(
   }),
   asyncHandler(
     controller.webhook
+  )
+);
+
+router.get(
+  "/verify/:reference",
+  asyncHandler(
+    controller.verify
   )
 );
 

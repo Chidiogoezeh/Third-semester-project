@@ -1,9 +1,11 @@
 import QRCode from "qrcode";
 
+import { env } from "../../config/env";
+
 export async function generateQRCode(
   token: string
 ) {
   return QRCode.toDataURL(
-    `${process.env.APP_URL}/verify/${token}`
+    `${env.CLIENT_URL}/verify/${token}`
   );
 }
