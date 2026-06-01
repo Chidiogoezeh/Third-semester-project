@@ -13,6 +13,8 @@ import { PaymentController } from "../payments/payment.controller";
 
 import { asyncHandler } from "../../shared/utils/asyncHandler";
 
+import { updateEventSchema } from "./event.validation";
+
 const router = Router();
 
 const controller = new EventController();
@@ -33,6 +35,15 @@ router.get(
   authMiddleware,
   roleMiddleware("CREATOR"),
   asyncHandler(controller.creatorEvents)
+);
+
+router.get(
+  "/:id/attendees",
+  authMiddleware,
+  roleMiddleware("CREATOR"),
+  asyncHandler(
+    controller.attendees
+  )
 );
 
 router.get(
@@ -62,6 +73,21 @@ router.post(
   authMiddleware,
   roleMiddleware("EVENTEE"),
   asyncHandler(reminderController.create)
+);
+
+router.patch(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("CREATOR"),
+  validate(updateEventSchema),
+  asyncHandler(controller.update)
+);
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("CREATOR"),
+  asyncHandler(controller.delete)
 );
 
 export default router;

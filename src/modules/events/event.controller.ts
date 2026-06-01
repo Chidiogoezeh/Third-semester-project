@@ -29,11 +29,18 @@ export class EventController {
     req: Request,
     res: Response
   ) => {
-    const page =
-      Number(req.query.page) || 1;
+    const page = Math.max(
+      1,
+      Number(req.query.page) || 1
+    );
 
-    const limit =
-      Number(req.query.limit) || 10;
+    const limit = Math.min(
+      100,
+      Math.max(
+        1,
+        Number(req.query.limit) || 10
+      )
+    );
 
     const result =
       await service.getEvents(
@@ -79,4 +86,54 @@ export class EventController {
       result
     );
   };
+
+  attendees = async (
+    req: Request<{ id: string }>,
+    res: Response
+  ) => {
+    const result =
+      await service.getEventAttendees(
+        req.params.id,
+        req.user!.userId
+      );
+
+    return successResponse(
+      res,
+      "Attendees fetched",
+      result
+    );
+  };
+
+  update = async (
+    req: Request<{ id: string }>,
+    res: Response
+  ) => {
+    const result =
+      await service.updateEvent(
+        req.params.id,
+        req.user!.userId,
+        req.body
+      );
+
+    return successResponse(
+      res,
+      "Event updated",
+      result
+    );
+  };
+  delete = async (
+    req: Request<{ id: string }>,
+    res: Response
+  ) => {
+    await service.deleteEvent(
+      req.params.id,
+      req.user!.userId
+    );
+
+    return successResponse(
+      res,
+      "Event deleted"
+    );
+  };
+
 }

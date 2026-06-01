@@ -1,7 +1,13 @@
 import { prisma } from "../../config/database";
 
+import {
+  Prisma
+} from "@prisma/client";
+
 export class EventRepository {
-  async create(data: any) {
+  async create(
+    data: Prisma.EventCreateInput
+  ) {
     return prisma.event.create({
       data
     });
@@ -25,10 +31,23 @@ export class EventRepository {
     });
   }
 
-  async findCreatorEvents(creatorId: string) {
+  async findByTitleSlug(
+    slug: string
+  ) {
+    return prisma.event.findUnique({
+      where: { slug }
+    });
+  }
+
+  async findCreatorEvents(
+    creatorId: string
+  ) {
     return prisma.event.findMany({
       where: {
         creatorId
+      },
+      orderBy: {
+        createdAt: "desc"
       }
     });
   }
@@ -52,6 +71,34 @@ export class EventRepository {
     return prisma.ticket.count({
       where: {
         eventId
+      }
+    });
+  }
+
+  async findById(id: string) {
+    return prisma.event.findUnique({
+      where: {
+        id
+      }
+    });
+  }
+
+  async update(
+    id: string,
+    data: Prisma.EventUpdateInput
+  ) {
+    return prisma.event.update({
+      where: {
+        id
+      },
+      data
+    });
+  }
+
+  async delete(id: string) {
+    return prisma.event.delete({
+      where: {
+        id
       }
     });
   }
