@@ -1,11 +1,28 @@
-import { Queue } from "bullmq";
+import { Queue }
+  from "bullmq";
 
-import { redis } from "../../config/redis";
+import { env }
+  from "../../config/env";
 
 export const reminderQueue =
   new Queue(
     "event-reminders",
     {
-      connection: redis
+      connection: {
+        host: new URL(
+          env.REDIS_URL
+        ).hostname,
+
+        port: Number(
+          new URL(
+            env.REDIS_URL
+          ).port
+        ),
+
+        password:
+          new URL(
+            env.REDIS_URL
+          ).password || undefined
+      }
     }
   );

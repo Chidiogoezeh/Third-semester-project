@@ -1,32 +1,23 @@
-import { Worker } from "bullmq";
+import { Worker }
+  from "bullmq";
 
-import { redis } from "../../config/redis";
+import { env }
+  from "../../config/env";
 
-import { NotificationService }
-  from "../notifications/notification.service";
-
-const notificationService =
-  new NotificationService();
-
-export const reminderWorker =
-  new Worker(
-    "event-reminders",
-
-    async job => {
-      await notificationService.sendReminderEmail(
-        {
-          email: job.data.email,
-          eventTitle:
-            job.data.eventTitle,
-          eventDate:
-            job.data.eventDate,
-          location:
-            job.data.location
-        }
-      );
-    },
-
-    {
-      connection: redis
+new Worker(
+  "event-reminders",
+  async job => {
+    console.log(job.data);
+  },
+  {
+    connection: {
+      host: new URL(env.REDIS_URL).hostname,
+      port: Number(
+        new URL(env.REDIS_URL).port
+      ),
+      password:
+        new URL(env.REDIS_URL).password ||
+        undefined
     }
-  );
+  }
+);
