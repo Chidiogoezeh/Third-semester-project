@@ -71,24 +71,6 @@ export class PaymentService {
       );
     }
 
-    if (event.capacity) {
-      const soldTickets =
-        await prisma.ticket.count({
-          where: {
-            eventId
-          }
-        });
-
-      if (
-        soldTickets >=
-        event.capacity
-      ) {
-        throw new BadRequestError(
-          "Event is sold out"
-        );
-      }
-    }
-
     const reference =
       crypto.randomUUID();
 
@@ -105,6 +87,13 @@ export class PaymentService {
       );
     }
 
+    const checkout =
+      await paystackService.initializeTransaction({
+        email: eventee.email,
+        amount: event.price,
+        reference
+      });
+
     const payment =
       await repository.create({
         eventId,
@@ -112,13 +101,6 @@ export class PaymentService {
         amount: event.price,
         reference,
         status: "PENDING"
-      });
-
-    const checkout =
-      await paystackService.initializeTransaction({
-        email: eventee.email,
-        amount: event.price,
-        reference
       });
 
     return {
@@ -158,9 +140,33 @@ export class PaymentService {
 
     const result =
       await prisma.$transaction(
-        async (
-          tx: Prisma.TransactionClient
-        ) => {
+        async (tx) => {
+
+          const event =
+            await tx.event.findUnique({
+              where: {
+                id: payment.eventId
+              }
+            });
+
+          const soldTickets =
+            await tx.ticket.count({
+              where: {
+                eventId:
+                  payment.eventId
+              }
+            });
+
+          if (
+            event?.capacity &&
+            soldTickets >=
+              event.capacity
+          ) {
+            throw new BadRequestError(
+              "Event sold out"
+            );
+          }
+
           const updatedPayment =
             await tx.payment.update({
               where: {
@@ -172,37 +178,28 @@ export class PaymentService {
               }
             });
 
-          const existingTicket =
-            await tx.ticket.findUnique({
+          const ticket =
+            await tx.ticket.upsert({
               where: {
-                paymentId: payment.id
+                paymentId:
+                  updatedPayment.id
+              },
+              update: {},
+              create: {
+                eventId:
+                  payment.eventId,
+                eventeeId:
+                  payment.eventeeId,
+                paymentId:
+                  updatedPayment.id,
+                ticketToken:
+                  crypto.randomUUID()
               }
             });
 
-          if (existingTicket) {
-            return {
-              payment: updatedPayment,
-              ticket: existingTicket
-            };
-          }
-
-          const ticket =
-          await tx.ticket.upsert({
-            where: {
-              paymentId: updatedPayment.id
-            },
-            update: {},
-            create: {
-              eventId: payment.eventId,
-              eventeeId: payment.eventeeId,
-              paymentId: updatedPayment.id,
-              ticketToken:
-                crypto.randomUUID()
-            }
-          });
-
           return {
-            payment: updatedPayment,
+            payment:
+              updatedPayment,
             ticket
           };
         }

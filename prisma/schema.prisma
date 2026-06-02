@@ -28,66 +28,64 @@ model User {
   createdAt DateTime @default(now())
 
   // Relations
-  events     Event[]
-  tickets    Ticket[]
-  reminders  Reminder[]
-  payments   Payment[]
+  events    Event[]
+  tickets   Ticket[]
+  reminders Reminder[]
+  payments  Payment[]
 
   @@map("users")
 }
 
 model Event {
-  id             String   @id @default(uuid())
-  creatorId      String
+  id        String @id @default(uuid())
+  creatorId String
 
-  title          String
-  slug           String   @unique
-  description    String
-  bannerUrl      String?
+  title       String
+  slug        String  @unique
+  description String
+  bannerUrl   String?
 
-  location       String
+  location String
 
-  // Amount in kobo/cents
-  price          Int
+  price Int
 
-  capacity       Int?
+  capacity Int?
 
-  eventDate      DateTime
+  eventDate DateTime
 
-  // Hours before event
-  reminderWindow Int      @default(24)
+  reminderWindow Int @default(24)
 
-  createdAt      DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  // Relations
   creator User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
-  tickets        Ticket[]
-  reminders      Reminder[]
-  payments       Payment[]
+  tickets   Ticket[]
+  reminders Reminder[]
+  payments  Payment[]
+
+  reminderTemplates EventReminderTemplate[]
 
   @@index([creatorId])
-
   @@map("events")
 }
 
 model Payment {
-  id         String        @id @default(uuid())
+  id String @id @default(uuid())
 
-  eventId    String
-  eventeeId  String
+  eventId   String
+  eventeeId String
 
   // Paystack transaction reference
-  reference  String        @unique
+  reference String @unique
 
   // Amount in kobo
-  amount     Int
+  amount Int
 
-  status     PaymentStatus @default(PENDING)
+  status PaymentStatus @default(PENDING)
 
-  paidAt     DateTime?
+  paidAt DateTime?
 
-  createdAt  DateTime      @default(now())
+  createdAt DateTime @default(now())
 
   // Relations
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -95,32 +93,31 @@ model Payment {
   eventee User @relation(fields: [eventeeId], references: [id], onDelete: Cascade)
 
   // One successful payment => one ticket
-  ticket     Ticket?
+  ticket Ticket?
 
   @@index([eventId])
   @@index([eventeeId])
   @@index([status])
-
   @@map("payments")
 }
 
 model Ticket {
-  id           String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  eventId      String
-  eventeeId    String
+  eventId   String
+  eventeeId String
 
   // Links ticket to successful payment
-  paymentId    String   @unique
+  paymentId String @unique
 
   // QR code payload / verification token
-  ticketToken  String   @unique
+  ticketToken String @unique
 
-  isScanned    Boolean  @default(false)
+  isScanned Boolean @default(false)
 
-  scannedAt    DateTime?
+  scannedAt DateTime?
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
   // Relations
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -131,31 +128,42 @@ model Ticket {
 
   // One ticket per user per event
   @@unique([eventId, eventeeId])
-
   @@index([eventId])
   @@index([eventeeId])
-
   @@map("tickets")
 }
 
 model Reminder {
-  id              String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  eventId         String
-  userId          String
+  eventId String
+  userId  String
 
-  // Hours before event
-  reminderOffset  Int
+  reminderOffset Int
 
-  createdAt       DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  // Relations
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([eventId, userId, reminderOffset])
   @@index([eventId])
   @@index([userId])
-
   @@map("reminders")
+}
+
+model EventReminderTemplate {
+  id String @id @default(uuid())
+
+  eventId String
+
+  offset Int
+
+  createdAt DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("event_reminder_templates")
 }
