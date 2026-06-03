@@ -2,24 +2,13 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
-
-import {
-  swaggerUi,
-  swaggerDocument
-} from "./config/swagger";
-
+import { swaggerUi, swaggerDocument } from "./config/swagger";
 import routes from "./routes";
-
 import { env } from "./config/env";
-
 import { apiLimiter } from "./middleware/rateLimit.middleware";
-
 import { errorMiddleware } from "./middleware/error.middleware";
-
 import { notFoundMiddleware } from "./middleware/notFound.middleware";
-
-import reminderTemplateRoutes
-  from "./modules/reminder-template/reminderTemplate.routes";
+import reminderTemplateRoutes from "./modules/reminder-template/reminderTemplate.routes";
 
 const app = express();
 

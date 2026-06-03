@@ -1,13 +1,7 @@
 import { Router } from "express";
-
-import { authMiddleware }
-  from "../../middleware/auth.middleware";
-
-import { asyncHandler }
-  from "../../shared/utils/asyncHandler";
-
-import { ReminderTemplateController }
-  from "./reminderTemplate.controller";
+import { authMiddleware } from "../../middleware/auth.middleware";
+import { asyncHandler } from "../../shared/utils/asyncHandler";
+import { ReminderTemplateController } from "./reminderTemplate.controller";
 
 const router = Router();
 

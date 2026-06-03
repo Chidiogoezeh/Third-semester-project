@@ -1,14 +1,7 @@
-import { prisma }
-  from "../../config/database";
-
-import { ForbiddenError }
-  from "../../shared/errors/forbidden";
-
-import { ReminderTemplateRepository }
-  from "./reminderTemplate.repository";
-
-import { NotFoundError }
-  from "../../shared/errors/notFound";
+import { prisma } from "../../config/database";
+import { ForbiddenError } from "../../shared/errors/forbidden";
+import { ReminderTemplateRepository } from "./reminderTemplate.repository";
+import { NotFoundError } from "../../shared/errors/notFound";
 
 const repository =
   new ReminderTemplateRepository();

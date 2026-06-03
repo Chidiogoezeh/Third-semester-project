@@ -1,9 +1,5 @@
 import { prisma } from "../../config/database";
-
-import {
-  Prisma
-} from "@prisma/client";
-
+import { Prisma } from "@prisma/client";
 export class TicketRepository {
   async create(
     data: Prisma.TicketUncheckedCreateInput
