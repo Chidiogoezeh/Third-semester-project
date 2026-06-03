@@ -1,7 +1,4 @@
-import jwt, {
-  SignOptions
-} from "jsonwebtoken";
-
+import jwt, { SignOptions } from "jsonwebtoken";
 import { env } from "../../config/env";
 
 type Payload = {

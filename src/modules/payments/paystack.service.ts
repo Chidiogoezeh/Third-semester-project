@@ -7,7 +7,7 @@ export class PaystackService {
     reference: string;
   }) {
     const response = await fetch(
-      `${paystackConfig.baseUrl}/transaction/initialize`,
+      `${paystackConfig.App_Url}/transaction/initialize`,
       {
         method: "POST",
         headers: {
@@ -38,7 +38,7 @@ export class PaystackService {
     reference: string
   ) {
     const response = await fetch(
-      `${paystackConfig.baseUrl}/transaction/verify/${reference}`,
+      `${paystackConfig.App_Url}/transaction/verify/${reference}`,
       {
         headers: {
           Authorization: `Bearer ${paystackConfig.secretKey}`

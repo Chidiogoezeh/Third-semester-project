@@ -29,8 +29,6 @@ export const env = {
 
   PAYSTACK_SECRET_KEY: getEnv("PAYSTACK_SECRET_KEY"),
 
-  PAYSTACK_WEBHOOK_SECRET: getEnv("PAYSTACK_WEBHOOK_SECRET"),
-
   REDIS_URL: process.env.REDIS_URL || "",
 
   CLIENT_URL: process.env.CLIENT_URL || "*",

@@ -1,5 +1,3 @@
-// src/shared/utils/slug.ts
-
 export function generateSlug(
   title: string
 ): string {

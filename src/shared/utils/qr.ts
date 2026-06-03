@@ -1,5 +1,4 @@
 import QRCode from "qrcode";
-
 import { env } from "../../config/env";
 
 export async function generateQRCode(
