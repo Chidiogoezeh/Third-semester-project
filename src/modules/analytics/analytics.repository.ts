@@ -9,7 +9,12 @@ export class AnalyticsRepository {
         creatorId
       },
       include: {
-        tickets: true
+        tickets: true,
+        payments: {
+          where: {
+            status: "SUCCESS"
+          }
+        }
       }
     });
   }
