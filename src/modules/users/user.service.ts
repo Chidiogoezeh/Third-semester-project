@@ -1,4 +1,3 @@
-import { prisma } from "../../config/database";
 import { UserRepository } from "./user.repository";
 import { NotFoundError } from "../../shared/errors/notFound";
 import { ConflictError } from "../../shared/errors/conflict";
