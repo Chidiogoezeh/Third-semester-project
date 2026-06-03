@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-
 import { env } from "../../config/env";
 
 export async function hashPassword(

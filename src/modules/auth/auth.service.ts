@@ -1,11 +1,7 @@
 import bcrypt from "bcrypt";
-
 import { AuthRepository } from "./auth.repository";
-
 import { env } from "../../config/env";
-
 import { BadRequestError } from "../../shared/errors/badRequest";
-
 import { generateToken } from "../../shared/utils/jwt";
 
 const repository = new AuthRepository();

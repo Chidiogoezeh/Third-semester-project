@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-
 import { AuthService } from "./auth.service";
-
 import { successResponse } from "../../shared/utils/response";
 
 const service = new AuthService();
