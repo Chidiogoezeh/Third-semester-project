@@ -6,6 +6,8 @@ import { NotificationService } from "../notifications/notification.service";
 import { BadRequestError } from "../../shared/errors/badRequest";
 import {  generateQRCode } from "../../shared/utils/qr";
 import { PaystackService } from "./paystack.service";
+import { ReminderTemplateApplicationService }
+from "../reminder-template/reminderTemplateApplication.service";
 
 const repository = new PaymentRepository();
 
@@ -14,6 +16,8 @@ const webhookService = new WebhookService();
 const notificationService = new NotificationService();
 
 const paystackService = new PaystackService();
+
+const reminderTemplateApplication = new ReminderTemplateApplicationService();
 
 export class PaymentService {
   async createBookingSession(
@@ -213,7 +217,12 @@ export class PaymentService {
         }
       );
 
-    const qrCode = 
+    await reminderTemplateApplication.applyTemplates(
+      payment.eventId,
+      payment.eventeeId
+    );
+
+    const qrCode =
       await generateQRCode(
         result.ticket.ticketToken
       );

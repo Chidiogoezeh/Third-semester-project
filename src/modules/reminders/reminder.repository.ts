@@ -6,4 +6,20 @@ export class ReminderRepository {
       data
     });
   }
+
+  async createMany(
+    data: {
+      eventId: string;
+      userId: string;
+      reminderOffset: number;
+    }[]
+  ) {
+    return prisma.$transaction(
+      data.map(item =>
+        prisma.reminder.create({
+          data: item
+        })
+      )
+    );
+  }
 }
