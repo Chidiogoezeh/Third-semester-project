@@ -67,10 +67,10 @@
         "tags": ["Payments"]
       }
     },
-    "/api/v1/payments/checkout/{id}": {
+    "/api/v1/events/{id}/book": {
       "post": {
-        "summary": "Initialize event booking payment",
-        "tags": ["Payments"],
+        "summary": "Book an event and initialize payment",
+        "tags": ["Events"],
         "parameters": [
           {
             "name": "id",
@@ -78,9 +78,15 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Event ID"
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking initialized successfully"
+          }
+        }
       }
     },
     "/api/v1/payments/webhook": {
