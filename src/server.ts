@@ -22,8 +22,19 @@ async function bootstrap() {
 
 bootstrap();
 
-process.on("SIGINT", async () => {
-  await prisma.$disconnect();
+async function shutdown() {
+  try {
+    logger.info("Shutting down gracefully...");
 
-  process.exit(0);
-});
+    await prisma.$disconnect();
+
+    process.exit(0);
+  } catch (error) {
+    logger.error(error);
+
+    process.exit(1);
+  }
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
