@@ -1,18 +1,12 @@
 import { Router } from "express";
-
 import { EventController } from "./event.controller";
-
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { roleMiddleware } from "../../middleware/role.middleware";
 import { validate } from "../../middleware/validate.middleware";
-
 import { createEventSchema } from "./event.validation";
-
 import { ReminderController } from "../reminders/reminder.controller";
 import { PaymentController } from "../payments/payment.controller";
-
 import { asyncHandler } from "../../shared/utils/asyncHandler";
-
 import { updateEventSchema } from "./event.validation";
 
 const router = Router();

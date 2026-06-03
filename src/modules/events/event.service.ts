@@ -1,19 +1,30 @@
 import { EventRepository } from "./event.repository";
-
 import { generateSlug } from "../../shared/utils/slug";
-
 import { ForbiddenError } from "../../shared/errors/forbidden";
 import { NotFoundError } from "../../shared/errors/notFound";
-
 import { CreateEventDto, UpdateEventDto } from "./event.validation";
-
 import { redis } from "../../config/redis";
-
-import { Prisma } from "@prisma/client";
 
 const repository = new EventRepository();
 
 export class EventService {
+  private async invalidateEventCaches(
+    slug?: string
+  ) {
+    if (!redis) return;
+
+    if (slug) {
+      await redis.del(`event:${slug}`);
+    }
+
+    const keys =
+      await redis.keys("events:*");
+
+    if (keys.length) {
+      await redis.del(...keys);
+    }
+  }
+
   async createEvent(
     creatorId: string,
     data: CreateEventDto
@@ -30,16 +41,21 @@ export class EventService {
       slug = `${slug}-${Date.now()}`;
     }
 
-    return repository.create({
-      ...data,
-      slug,
-      eventDate: new Date(data.eventDate),
-      creator: {
-        connect: {
-          id: creatorId
+    const event =
+      await repository.create({
+        ...data,
+        slug,
+        eventDate: new Date(data.eventDate),
+        creator: {
+          connect: {
+            id: creatorId
+          }
         }
-      }
-    });
+      });
+
+    await this.invalidateEventCaches();
+
+    return event;
   }
 
   async getEvents(
@@ -187,11 +203,9 @@ export class EventService {
         }
       );
 
-    if (redis) {
-      await redis.del(
-        `event:${event.slug}`
-      );
-    }
+    await this.invalidateEventCaches(
+      event.slug
+    );
 
     return updated;
   }
@@ -217,13 +231,11 @@ export class EventService {
       );
     }
 
-    if (redis) {
-      await redis.del(
-        `event:${event.slug}`
-      );
-    }
-
     await repository.delete(eventId);
+
+    await this.invalidateEventCaches(
+      event.slug
+    );
 
     return null;
   }

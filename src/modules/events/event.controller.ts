@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-
 import { EventService } from "./event.service";
-
 import { successResponse } from "../../shared/utils/response";
 
 const service = new EventService();
