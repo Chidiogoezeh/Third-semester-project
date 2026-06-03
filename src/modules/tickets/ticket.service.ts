@@ -51,7 +51,8 @@ export class TicketService {
   }
 
   async verifyTicket(
-    ticketToken: string
+    ticketToken: string,
+    creatorId: string
   ) {
     const ticket =
       await repository.findByToken(
@@ -61,6 +62,15 @@ export class TicketService {
     if (!ticket) {
       throw new BadRequestError(
         "Invalid ticket"
+      );
+    }
+
+    if (
+      ticket.event.creatorId !==
+      creatorId
+    ) {
+      throw new BadRequestError(
+        "You are not authorized to verify tickets for this event"
       );
     }
 

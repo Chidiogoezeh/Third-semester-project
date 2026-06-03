@@ -11,7 +11,8 @@ export class TicketController {
   ) => {
     const result =
       await service.verifyTicket(
-        req.body.ticketToken
+        req.body.ticketToken,
+        req.user.userId
       );
 
     return successResponse(

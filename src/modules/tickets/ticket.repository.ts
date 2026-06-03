@@ -10,11 +10,17 @@ export class TicketRepository {
   }
 
   async findByToken(
-    ticketToken: string
-  ) {
+    ticketToken: string) {
     return prisma.ticket.findUnique({
       where: {
         ticketToken
+      },
+      include: {
+        event: {
+          select: {
+            creatorId: true
+          }
+        }
       }
     });
   }
