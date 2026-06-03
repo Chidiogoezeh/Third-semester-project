@@ -165,5 +165,6 @@ model EventReminderTemplate {
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
+  @@unique([eventId, offset])
   @@map("event_reminder_templates")
 }
