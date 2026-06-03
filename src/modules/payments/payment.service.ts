@@ -1,18 +1,10 @@
 import crypto from "crypto";
-
 import { prisma } from "../../config/database";
-
 import { PaymentRepository } from "./payment.repository";
 import { WebhookService } from "./webhook.service";
-
 import { NotificationService } from "../notifications/notification.service";
-
 import { BadRequestError } from "../../shared/errors/badRequest";
-
-import { Prisma } from "@prisma/client";
-
 import {  generateQRCode } from "../../shared/utils/qr";
-
 import { PaystackService } from "./paystack.service";
 
 const repository = new PaymentRepository();
@@ -299,6 +291,18 @@ export class PaymentService {
     };
   }
 
+  const expectedAmount =
+    payment.amount * 100;
+
+  if (
+    webhookEvent.data.amount !==
+    expectedAmount
+  ) {
+    throw new BadRequestError(
+      "Payment amount mismatch"
+    );
+  }
+
   await this.completePayment(
     reference
   );
@@ -331,9 +335,23 @@ export class PaymentService {
       verification.data.status ===
         "success"
     ) {
-      await this.completePayment(
-        reference
-      );
+        // ADD HERE
+
+        const expectedAmount =
+          payment.amount * 100;
+
+        if (
+          verification.data.amount !==
+          expectedAmount
+        ) {
+          throw new BadRequestError(
+            "Payment amount mismatch"
+          );
+        }
+
+        await this.completePayment(
+          reference
+        );
     }
 
     return verification.data;

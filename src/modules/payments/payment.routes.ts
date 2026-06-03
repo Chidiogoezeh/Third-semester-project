@@ -1,9 +1,6 @@
 import express, { Router } from "express";
-
 import { PaymentController } from "./payment.controller";
-
 import { asyncHandler } from "../../shared/utils/asyncHandler";
-
 import { authMiddleware } from "../../middleware/auth.middleware";
 
 const router = Router();

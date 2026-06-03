@@ -1,8 +1,4 @@
-import {
-  Prisma,
-  PaymentStatus
-} from "@prisma/client";
-
+import { Prisma, PaymentStatus } from "@prisma/client";
 import { prisma } from "../../config/database";
 
 export class PaymentRepository {

@@ -1,9 +1,6 @@
 import { prisma } from "../../config/database";
-
 import { PaystackService } from "./paystack.service";
-
-import { PaymentService }
-  from "./payment.service";
+import { PaymentService } from "./payment.service";
 
 const paymentService =
   new PaymentService();
