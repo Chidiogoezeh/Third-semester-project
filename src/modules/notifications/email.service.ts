@@ -1,7 +1,5 @@
 import nodemailer from "nodemailer";
-
 import { env } from "../../config/env";
-
 import { SendEmailOptions } from "./notification.types";
 
 const transporter =

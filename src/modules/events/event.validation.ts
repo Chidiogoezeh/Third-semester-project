@@ -5,7 +5,7 @@ export const createEventSchema = z.object({
   description: z.string().min(10),
   location: z.string(),
   price: z.coerce.number(),
-  capacity: z.coerce.number().optional(),
+  capacity: z.coerce.number().int().positive().optional(),
   eventDate: z.string().datetime(),
   reminderWindow: z.coerce.number().optional()
 });
@@ -21,11 +21,7 @@ export const updateEventSchema = z.object({
 });
 
 export type CreateEventDto =
-  z.infer<
-    typeof createEventSchema
-  >;
+  z.infer<typeof createEventSchema>;
 
 export type UpdateEventDto =
-  z.infer<
-    typeof updateEventSchema
-  >;
+  z.infer<typeof updateEventSchema>;
