@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-
 import { UserService } from "./user.service";
-
 import { successResponse } from "../../shared/utils/response";
 
 const service = new UserService();
