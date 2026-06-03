@@ -5,10 +5,9 @@ import { generateSlug } from "../../shared/utils/slug";
 import { ForbiddenError } from "../../shared/errors/forbidden";
 import { NotFoundError } from "../../shared/errors/notFound";
 
-import {
-  CreateEventDto,
-  UpdateEventDto
-} from "./event.validation";
+import { CreateEventDto, UpdateEventDto } from "./event.validation";
+
+import { redis } from "../../config/redis";
 
 import { Prisma } from "@prisma/client";
 
@@ -43,19 +42,70 @@ export class EventService {
     });
   }
 
-  async getEvents(page = 1, limit = 10) {
+  async getEvents(
+    page = 1,
+    limit = 10,
+    search?: string
+  ) {
+    const cacheKey = `events:${page}:${limit}:${search ?? ""}`;
+
+    if (redis) {
+      const cached =
+        await redis.get(cacheKey);
+
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    }
+
     const skip = (page - 1) * limit;
 
-    return repository.findAll(skip, limit);
+    const events =
+      await repository.findAll(
+        skip,
+        limit,
+        search
+      );
+
+    if (redis) {
+      await redis.set(
+        cacheKey,
+        JSON.stringify(events),
+        "EX",
+        300
+      );
+    }
+
+    return events;
   }
 
   async getEvent(slug: string) {
+    const cacheKey = `event:${slug}`;
+
+    if (redis) {
+      const cached =
+        await redis.get(cacheKey);
+
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    }
+
     const event =
       await repository.findBySlug(slug);
 
     if (!event) {
       throw new NotFoundError(
         "Event not found"
+      );
+    }
+
+    if (redis) {
+      await redis.set(
+        cacheKey,
+        JSON.stringify(event),
+        "EX",
+        300
       );
     }
 
@@ -126,15 +176,24 @@ export class EventService {
       );
     }
 
-    return repository.update(
-      eventId,
-      {
-        ...data,
-        eventDate: data.eventDate
-          ? new Date(data.eventDate)
-          : undefined
-      }
-    );
+    const updated =
+      await repository.update(
+        eventId,
+        {
+          ...data,
+          eventDate: data.eventDate
+            ? new Date(data.eventDate)
+            : undefined
+        }
+      );
+
+    if (redis) {
+      await redis.del(
+        `event:${event.slug}`
+      );
+    }
+
+    return updated;
   }
 
   async deleteEvent(
@@ -155,6 +214,12 @@ export class EventService {
     ) {
       throw new ForbiddenError(
         "Not your event"
+      );
+    }
+
+    if (redis) {
+      await redis.del(
+        `event:${event.slug}`
       );
     }
 

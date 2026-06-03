@@ -2,6 +2,12 @@ import { prisma } from "../../config/database";
 
 import { PaystackService } from "./paystack.service";
 
+import { PaymentService }
+  from "./payment.service";
+
+const paymentService =
+  new PaymentService();
+
 const paystack =
   new PaystackService();
 
@@ -26,18 +32,13 @@ export class ReconciliationService {
       );
 
     if (
-      verification.data.status ===
-      "success"
+    verification.status &&
+    verification.data.status ===
+        "success"
     ) {
-      await prisma.payment.update({
-        where: {
-          reference
-        },
-        data: {
-          status: "SUCCESS",
-          paidAt: new Date()
-        }
-      });
+    await paymentService.verifyPayment(
+        reference
+    );
     }
 
     return verification.data;

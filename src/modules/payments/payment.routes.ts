@@ -36,4 +36,12 @@ router.get(
   )
 );
 
+router.post(
+  "/reconcile/:reference",
+  authMiddleware,
+  asyncHandler(
+    controller.reconcile
+  )
+);
+
 export default router;

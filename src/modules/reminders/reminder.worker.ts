@@ -1,13 +1,18 @@
-import { Worker }
-  from "bullmq";
+import { Worker } from "bullmq";
 
-import { env }
-  from "../../config/env";
+import { env } from "../../config/env";
+import { NotificationService }
+  from "../../modules/notifications/notification.service";
 
 new Worker(
   "event-reminders",
   async job => {
-    console.log(job.data);
+    const notification =
+      new NotificationService();
+
+    await notification.sendReminderEmail(
+      job.data
+    );
   },
   {
     connection: {

@@ -11,7 +11,7 @@ export class WebhookService {
       crypto
         .createHmac(
           "sha512",
-          env.PAYSTACK_SECRET_KEY
+          env.PAYSTACK_WEBHOOK_SECRET
         )
         .update(payload)
         .digest("hex") === signature

@@ -24,10 +24,8 @@ export class AnalyticsRepository {
         },
         where: {
           status: "SUCCESS",
-          ticket: {
-            event: {
-              creatorId
-            }
+          event: {
+            creatorId
           }
         }
       });

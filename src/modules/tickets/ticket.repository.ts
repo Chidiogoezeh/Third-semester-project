@@ -23,17 +23,19 @@ export class TicketRepository {
     });
   }
 
-  async markAsScanned(
-    id: string
-  ) {
-    return prisma.ticket.update({
-      where: {
-        id
-      },
-      data: {
-        isScanned: true,
-        scannedAt: new Date()
-      }
-    });
+  async scanTicket(ticketToken: string) {
+    const result =
+      await prisma.ticket.updateMany({
+        where: {
+          ticketToken,
+          isScanned: false
+        },
+        data: {
+          isScanned: true,
+          scannedAt: new Date()
+        }
+      });
+
+    return result.count;
   }
 }

@@ -71,6 +71,22 @@ export class PaymentService {
       );
     }
 
+    const soldTickets =
+      await prisma.ticket.count({
+        where: {
+          eventId
+        }
+      });
+
+    if (
+      event.capacity &&
+      soldTickets >= event.capacity
+    ) {
+      throw new BadRequestError(
+        "Event sold out"
+      );
+    }
+
     const reference =
       crypto.randomUUID();
 

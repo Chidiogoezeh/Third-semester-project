@@ -33,10 +33,13 @@ export class AnalyticsService {
       0
     );
 
+    const totalAttendees = scannedTickets;
+
     return {
       revenue,
       ticketsSold,
       scannedTickets,
+      totalAttendees,
       attendanceRate:
         ticketsSold === 0
           ? 0

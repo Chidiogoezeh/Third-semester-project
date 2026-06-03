@@ -25,15 +25,18 @@ export class UserService {
     id: string,
     data: any
   ) {
-    return prisma.user.update({
-      where: { id },
-      data,
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        createdAt: true
-      }
-    });
+    const user =
+      await repository.findById(id);
+
+    if (!user) {
+      throw new NotFoundError(
+        "User not found"
+      );
+    }
+
+    return repository.updateProfile(
+      id,
+      data
+    );
   }
 }

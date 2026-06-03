@@ -83,12 +83,11 @@
         ]
       }
     },
-  "/api/v1/payments/webhook": {
-    "post": {
-      "summary": "Paystack webhook endpoint",
-      "tags": ["Payments"]
+    "/api/v1/payments/webhook": {
+      "post": {
+        "summary": "Paystack webhook endpoint",
+        "tags": ["Payments"]
+      }
     }
   }
-
-    }
-  }
+}

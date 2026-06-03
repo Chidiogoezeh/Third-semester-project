@@ -89,14 +89,16 @@ export class TicketService {
       );
     }
 
-    if (ticket.isScanned) {
+    const updated =
+      await repository.scanTicket(
+        ticketToken
+      );
+
+    if (updated === 0) {
       throw new ConflictError(
         "Ticket already scanned"
       );
     }
-
-    return repository.markAsScanned(
-      ticket.id
-    );
+    return updated;
   }
 }

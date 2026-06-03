@@ -42,10 +42,15 @@ export class EventController {
       )
     );
 
+    const search = String(
+      req.query.search || ""
+    );
+
     const result =
       await service.getEvents(
         page,
-        limit
+        limit,
+        search
       );
 
     return successResponse(

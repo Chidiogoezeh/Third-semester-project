@@ -18,6 +18,9 @@ import { errorMiddleware } from "./middleware/error.middleware";
 
 import { notFoundMiddleware } from "./middleware/notFound.middleware";
 
+import reminderTemplateRoutes
+  from "./modules/reminder-template/reminderTemplate.routes";
+
 const app = express();
 
 app.use(helmet());
@@ -49,6 +52,11 @@ app.use(
 );
 
 app.use("/api/v1", routes);
+
+app.use(
+  "/api/v1",
+  reminderTemplateRoutes
+);
 
 app.use(notFoundMiddleware);
 

@@ -13,10 +13,22 @@ export class EventRepository {
     });
   }
 
-  async findAll(skip: number, take: number) {
+  async findAll(
+    skip: number,
+    take: number,
+    search?: string
+  ) {
     return prisma.event.findMany({
       skip,
       take,
+      where: search
+        ? {
+            title: {
+              contains: search,
+              mode: "insensitive"
+            }
+          }
+        : undefined,
       orderBy: {
         createdAt: "desc"
       }
