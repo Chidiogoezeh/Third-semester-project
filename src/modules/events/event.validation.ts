@@ -4,7 +4,7 @@ export const createEventSchema = z.object({
   title: z.string().min(3),
   description: z.string().min(10),
   location: z.string(),
-  price: z.coerce.number(),
+  price: z.coerce.number().min(0),
   capacity: z.coerce.number().int().positive().optional(),
   eventDate: z.string().datetime(),
   reminderWindow: z.coerce.number().optional()
