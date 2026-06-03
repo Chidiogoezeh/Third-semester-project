@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-
 import { ReminderService } from "./reminder.service";
-
 import { successResponse } from "../../shared/utils/response";
 
 const service = new ReminderService();

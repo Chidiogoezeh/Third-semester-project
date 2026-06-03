@@ -1,12 +1,7 @@
 import { prisma } from "../../config/database";
-
 import { ReminderRepository } from "./reminder.repository";
-
-import { scheduleReminder }
-  from "./reminder.scheduler";
-
-import { NotFoundError }
-  from "../../shared/errors/notFound";
+import { scheduleReminder } from "./reminder.scheduler";
+import { NotFoundError } from "../../shared/errors/notFound";
 
 const repository =
   new ReminderRepository();

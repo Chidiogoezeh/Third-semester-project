@@ -8,6 +8,10 @@ export async function scheduleReminder(data: {
   location: string;
   reminderOffset: number;
 }) {
+  if (!reminderQueue) {
+    return;
+  }
+
   const reminderTime = new Date(
     data.eventDate
   );
@@ -27,14 +31,12 @@ export async function scheduleReminder(data: {
 
   await reminderQueue.add(
     "event-reminder",
-
     {
       email: data.email,
       eventTitle: data.eventTitle,
       eventDate: data.eventDate,
       location: data.location
     },
-
     {
       delay,
       jobId: data.reminderId
