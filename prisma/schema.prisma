@@ -55,8 +55,6 @@ model Event {
 
   reminderWindow Int @default(24)
 
-  reminderTemplates Json?
-
   createdAt DateTime @default(now())
 
   creator User @relation(fields: [creatorId], references: [id], onDelete: Cascade)

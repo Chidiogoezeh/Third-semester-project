@@ -28,7 +28,6 @@ CREATE TABLE "events" (
     "capacity" INTEGER,
     "eventDate" TIMESTAMP(3) NOT NULL,
     "reminderWindow" INTEGER NOT NULL DEFAULT 24,
-    "reminderTemplates" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "events_pkey" PRIMARY KEY ("id")

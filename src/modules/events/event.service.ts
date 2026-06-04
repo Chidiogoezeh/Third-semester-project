@@ -34,9 +34,6 @@ export class EventService {
         data: {
           ...data,
 
-          reminderTemplates:
-            data.reminderTemplates ?? [24],
-
           slug,
 
           eventDate: new Date(
@@ -50,8 +47,7 @@ export class EventService {
           }
         }
       });
-
-    await this.invalidateEventCaches();
+      await this.invalidateEventCaches();
 
     return event;
   }

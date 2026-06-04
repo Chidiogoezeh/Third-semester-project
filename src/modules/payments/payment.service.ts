@@ -222,44 +222,30 @@ export class PaymentService {
         result.ticket.ticketToken
       );
 
-    const offsets =
-      (payment.event
-        .reminderTemplates as number[]) ??
-      [24];
+    const offsets = [
+      payment.event.reminderWindow
+    ];
 
-    for (const offset of offsets) {
-      const reminder =
-        await prisma.reminder.create({
-          data: {
-            eventId:
-              payment.eventId,
-            userId:
-              payment.eventeeId,
-            reminderOffset:
-              offset
-          }
-        });
-
-      await scheduleReminder({
-        reminderId:
-          reminder.id,
-
-        email:
-          payment.eventee.email,
-
-        eventTitle:
-          payment.event.title,
-
-        eventDate:
-          payment.event.eventDate,
-
-        location:
-          payment.event.location,
-
-        reminderOffset:
-          offset
+    const reminder =
+      await prisma.reminder.create({
+        data: {
+          eventId: payment.eventId,
+          userId: payment.eventeeId,
+          reminderOffset:
+            payment.event.reminderWindow
+        }
       });
-    }
+
+    await scheduleReminder({
+      reminderId: reminder.id,
+      email: payment.eventee.email,
+      eventTitle: payment.event.title,
+      eventDate: payment.event.eventDate,
+      location: payment.event.location,
+      reminderOffset:
+        payment.event.reminderWindow
+    });
+    
 
     await notificationService.sendTicketEmail({
       email:
