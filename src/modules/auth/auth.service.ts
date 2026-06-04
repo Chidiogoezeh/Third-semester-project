@@ -1,6 +1,5 @@
-import bcrypt from "bcrypt";
+import { hashPassword, comparePassword } from "../../shared/utils/password";
 import { AuthRepository } from "./auth.repository";
-import { env } from "../../config/env";
 import { BadRequestError } from "../../shared/errors/badRequest";
 import { generateToken } from "../../shared/utils/jwt";
 
@@ -24,9 +23,8 @@ export class AuthService {
     }
 
     const hashedPassword =
-      await bcrypt.hash(
-        data.password,
-        env.BCRYPT_SALT_ROUNDS
+      await hashPassword(
+        data.password
       );
 
     const user =
@@ -68,7 +66,7 @@ export class AuthService {
     }
 
     const isPasswordValid =
-      await bcrypt.compare(
+      await comparePassword(
         data.password,
         user.password
       );
