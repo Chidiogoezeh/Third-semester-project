@@ -1,14 +1,6 @@
 import { prisma } from "../../config/database";
-import { Prisma } from "@prisma/client";
-export class TicketRepository {
-  async create(
-    data: Prisma.TicketUncheckedCreateInput
-  ) {
-    return prisma.ticket.create({
-      data
-    });
-  }
 
+export class TicketRepository {
   async findByToken(
     ticketToken: string) {
     return prisma.ticket.findUnique({
