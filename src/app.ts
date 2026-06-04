@@ -27,9 +27,9 @@ app.use(apiLimiter);
 app.use(express.json());
 
 app.get("/", (_req, res) => {
-  res.json({
+  res.status(200).json({
     success: true,
-    message: "Eventful API running"
+    message: "Healthy"
   });
 });
 
