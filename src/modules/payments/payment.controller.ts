@@ -46,20 +46,4 @@ export class PaymentController {
       result
     );
   };
-
-  verify = async (
-    req: Request<{ reference: string }>,
-    res: Response
-  ) => {
-    const result =
-      await service.verifyPayment(
-        req.params.reference
-      );
-
-    return successResponse(
-      res,
-      "Payment verified",
-      result
-    );
-  };
 }

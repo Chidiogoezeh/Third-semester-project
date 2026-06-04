@@ -25,11 +25,4 @@ router.post(
     controller.webhook
   )
 );
-
-router.get(
-  "/verify/:reference",
-  asyncHandler(
-    controller.verify
-  )
-);
 export default router;

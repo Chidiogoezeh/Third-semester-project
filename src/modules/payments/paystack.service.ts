@@ -33,21 +33,4 @@ export class PaystackService {
 
     return result.data;
   }
-
-  async verifyTransaction(
-    reference: string
-  ) {
-    const response = await fetch(
-      `${paystackConfig.App_Url}/transaction/verify/${reference}`,
-      {
-        headers: {
-          Authorization: `Bearer ${paystackConfig.secretKey}`
-        }
-      }
-    );
-
-    const result = await response.json();
-
-    return result;
-  }
 }

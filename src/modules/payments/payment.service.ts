@@ -287,6 +287,21 @@ export class PaymentService {
   payload: string,
   signature: string
 ) {
+  const expectedSignature =
+    crypto
+      .createHmac(
+        "sha512",
+        process.env.PAYSTACK_SECRET_KEY!
+      )
+      .update(payload)
+      .digest("hex");
+
+  if (expectedSignature !== signature) {
+    throw AppError.unauthorized(
+      "Invalid webhook signature"
+    );
+  }
+
   const webhookEvent =
     JSON.parse(payload);
 
@@ -349,71 +364,4 @@ export class PaymentService {
     verified: true
   };
 }
-  async verifyPayment(
-    reference: string
-  ) {
-    const payment =
-      await prisma.payment.findUnique({
-        where: {
-          reference
-        },
-        include: {
-          ticket: true,
-          event: true,
-          eventee: true
-        }
-      });
-
-    if (!payment) {
-      throw AppError.badRequest(
-        "Payment not found"
-      );
-    }
-
-    if (
-      payment.status === "SUCCESS" &&
-      payment.ticket
-    ) {
-      return {
-        payment,
-        alreadyProcessed: true
-      };
-    }
-
-    const verification =
-      await paystackService.verifyTransaction(
-        reference
-      );
-
-    if (!verification.status) {
-      throw AppError.badRequest(
-        "Verification failed"
-      );
-    }
-
-    if (
-      verification.data.status !==
-      "success"
-    ) {
-      return verification.data;
-    }
-
-    const expectedAmount =
-      payment.amount * 100;
-
-    if (
-      verification.data.amount !==
-      expectedAmount
-    ) {
-      throw AppError.badRequest(
-        "Payment amount mismatch"
-      );
-    }
-
-    await this.completePayment(
-      reference
-    );
-
-    return verification.data;
-  }
 }

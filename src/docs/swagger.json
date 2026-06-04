@@ -61,12 +61,6 @@
         "tags": ["Analytics"]
       }
     },
-    "/api/v1/payments/verify/{reference}": {
-      "get": {
-        "summary": "Verify payment status",
-        "tags": ["Payments"]
-      }
-    },
     "/api/v1/events/{id}/book": {
       "post": {
         "summary": "Book an event and initialize payment",
