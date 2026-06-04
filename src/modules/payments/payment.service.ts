@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import { prisma } from "../../config/database";
 import { PaymentRepository } from "./payment.repository";
-import { WebhookService } from "./webhook.service";
 import { NotificationService } from "../notifications/notification.service";
 import { BadRequestError } from "../../shared/errors/badRequest";
 import {  generateQRCode } from "../../shared/utils/qr";
@@ -9,8 +8,6 @@ import { PaystackService } from "./paystack.service";
 import { scheduleReminder } from "../reminders/reminder.worker";
 
 const repository = new PaymentRepository();
-
-const webhookService = new WebhookService();
 
 const notificationService = new NotificationService();
 
@@ -284,18 +281,6 @@ export class PaymentService {
   payload: string,
   signature: string
 ) {
-  const isValid =
-    webhookService.verifySignature(
-      payload,
-      signature
-    );
-
-  if (!isValid) {
-    throw new BadRequestError(
-      "Invalid webhook signature"
-    );
-  }
-
   const webhookEvent =
     JSON.parse(payload);
 
@@ -365,34 +350,49 @@ export class PaymentService {
       );
     }
 
+    if (
+      payment.status === "SUCCESS" &&
+      payment.ticket
+    ) {
+      return {
+        payment,
+        alreadyProcessed: true
+      };
+    }
+
     const verification =
       await paystackService.verifyTransaction(
         reference
       );
 
-    if (
-      verification.status &&
-      verification.data.status ===
-        "success"
-    ) {
-        // ADD HERE
-
-        const expectedAmount =
-          payment.amount * 100;
-
-        if (
-          verification.data.amount !==
-          expectedAmount
-        ) {
-          throw new BadRequestError(
-            "Payment amount mismatch"
-          );
-        }
-
-        await this.completePayment(
-          reference
-        );
+    if (!verification.status) {
+      throw new BadRequestError(
+        "Verification failed"
+      );
     }
+
+    if (
+      verification.data.status !==
+      "success"
+    ) {
+      return verification.data;
+    }
+
+    const expectedAmount =
+      payment.amount * 100;
+
+    if (
+      verification.data.amount !==
+      expectedAmount
+    ) {
+      throw new BadRequestError(
+        "Payment amount mismatch"
+      );
+    }
+
+    await this.completePayment(
+      reference
+    );
 
     return verification.data;
   }

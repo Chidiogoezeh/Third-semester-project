@@ -1,12 +1,8 @@
 import { Request, Response } from "express";
 import { PaymentService } from "./payment.service";
 import { successResponse } from "../../shared/utils/response";
-import { ReconciliationService } from "./reconciliation.service";
 
 const service = new PaymentService();
-
-const reconciliationService =
-  new ReconciliationService();
 
 export class PaymentController {
   initializeBooking = async (
@@ -63,21 +59,6 @@ export class PaymentController {
     return successResponse(
       res,
       "Payment verified",
-      result
-    );
-  };
-  reconcile = async (
-    req: Request<{ reference: string }>,
-    res: Response
-  ) => {
-    const result =
-      await reconciliationService.reconcilePayment(
-        req.params.reference
-      );
-
-    return successResponse(
-      res,
-      "Payment reconciled",
       result
     );
   };
