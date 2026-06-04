@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { prisma } from "../../config/database";
 import { NotificationService } from "../notifications/notification.service";
-import { BadRequestError } from "../../shared/errors/badRequest";
+import { AppError } from "../../shared/errors/appError";
 import {  generateQRCode } from "../../shared/utils/qr";
 import { PaystackService } from "./paystack.service";
 import { scheduleReminder } from "../reminders/reminder.worker";
@@ -23,7 +23,7 @@ export class PaymentService {
       });
 
     if (!event) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Event not found"
       );
     }
@@ -31,7 +31,7 @@ export class PaymentService {
     if (
       event.creatorId === eventeeId
     ) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Creators cannot book their own event"
       );
     }
@@ -39,7 +39,7 @@ export class PaymentService {
     if (
       event.eventDate < new Date()
     ) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Cannot book past events"
       );
     }
@@ -53,7 +53,7 @@ export class PaymentService {
       });
 
     if (existingTicket) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Ticket already purchased"
       );
     }
@@ -69,7 +69,7 @@ export class PaymentService {
       event.capacity &&
       soldTickets >= event.capacity
     ) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Event sold out"
       );
     }
@@ -85,7 +85,7 @@ export class PaymentService {
       });
 
     if (!eventee) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "User not found"
       );
     }
@@ -134,7 +134,7 @@ export class PaymentService {
       });
 
     if (!payment) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Payment not found"
       );
     }
@@ -174,7 +174,7 @@ export class PaymentService {
             soldTickets >=
               event.capacity
           ) {
-            throw new BadRequestError(
+            throw AppError.badRequest(
               "Event sold out"
             );
           }
@@ -315,7 +315,7 @@ export class PaymentService {
     });
 
   if (!payment) {
-    throw new BadRequestError(
+    throw AppError.badRequest(
       "Payment not found"
     );
   }
@@ -336,7 +336,7 @@ export class PaymentService {
     webhookEvent.data.amount !==
     expectedAmount
   ) {
-    throw new BadRequestError(
+    throw AppError.badRequest(
       "Payment amount mismatch"
     );
   }
@@ -365,7 +365,7 @@ export class PaymentService {
       });
 
     if (!payment) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Payment not found"
       );
     }
@@ -386,7 +386,7 @@ export class PaymentService {
       );
 
     if (!verification.status) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Verification failed"
       );
     }
@@ -405,7 +405,7 @@ export class PaymentService {
       verification.data.amount !==
       expectedAmount
     ) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Payment amount mismatch"
       );
     }

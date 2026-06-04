@@ -1,5 +1,5 @@
 import { hashPassword, comparePassword } from "../../shared/utils/password";
-import { BadRequestError } from "../../shared/errors/badRequest";
+import { AppError } from "../../shared/errors/appError";
 import { generateToken } from "../../shared/utils/jwt";
 import { prisma } from "../../config/database";
 
@@ -17,7 +17,7 @@ export class AuthService {
       });
 
     if (existingUser) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Email already exists"
       );
     }
@@ -64,7 +64,7 @@ export class AuthService {
       });
 
     if (!user) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Invalid credentials"
       );
     }
@@ -76,7 +76,7 @@ export class AuthService {
       );
 
     if (!isPasswordValid) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Invalid credentials"
       );
     }

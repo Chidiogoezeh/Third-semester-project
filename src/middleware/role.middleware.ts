@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ForbiddenError } from "../shared/errors/forbidden";
+import { AppError } from "../shared/errors/appError";
 
 export function roleMiddleware(...roles: string[]) {
   return (
@@ -8,11 +8,11 @@ export function roleMiddleware(...roles: string[]) {
     next: NextFunction
   ) => {
     if (!req.user) {
-      throw new ForbiddenError();
+      throw AppError.forbidden("Access denied");
     }
 
     if (!roles.includes(req.user.role)) {
-      throw new ForbiddenError();
+      throw AppError.forbidden("Access denied");
     }
 
     next();

@@ -1,6 +1,6 @@
 import { prisma } from "../../config/database";
 import { scheduleReminder } from "./reminder.worker";
-import { NotFoundError } from "../../shared/errors/notFound";
+import { AppError } from "../../shared/errors/appError";
 
 export class ReminderService {
   async createReminder(data: {
@@ -21,7 +21,7 @@ export class ReminderService {
       });
 
     if (!event) {
-      throw new NotFoundError(
+      throw AppError.notFound(
         "Event not found"
       );
     }
@@ -34,7 +34,7 @@ export class ReminderService {
       });
 
     if (!user) {
-      throw new NotFoundError(
+      throw AppError.notFound(
         "User not found"
       );
     }

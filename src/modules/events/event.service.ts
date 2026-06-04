@@ -1,6 +1,5 @@
 import { generateSlug } from "../../shared/utils/slug";
-import { ForbiddenError } from "../../shared/errors/forbidden";
-import { NotFoundError } from "../../shared/errors/notFound";
+import { AppError } from "../../shared/errors/appError";
 import { CreateEventDto, UpdateEventDto } from "./event.validation";
 import { redis } from "../../config/redis";
 import { prisma } from "../../config/database";
@@ -133,9 +132,7 @@ export class EventService {
       });
 
     if (!event) {
-      throw new NotFoundError(
-        "Event not found"
-      );
+      throw AppError.notFound("User not found");
     }
 
     if (redis) {
@@ -174,17 +171,13 @@ export class EventService {
       });
 
     if (!event) {
-      throw new NotFoundError(
-        "Event not found"
-      );
+      throw AppError.notFound("User not found");
     }
 
     if (
       event.creatorId !== creatorId
     ) {
-      throw new ForbiddenError(
-        "Not your event"
-      );
+      throw AppError.forbidden("Access denied");
     }
 
     const attendees =
@@ -227,17 +220,13 @@ export class EventService {
       });
 
     if (!event) {
-      throw new NotFoundError(
-        "Event not found"
-      );
+      throw AppError.notFound("User not found");
     }
 
     if (
       event.creatorId !== creatorId
     ) {
-      throw new ForbiddenError(
-        "Not your event"
-      );
+      throw AppError.forbidden("Access denied");
     }
 
     const updated =
@@ -274,17 +263,13 @@ export class EventService {
       });
 
     if (!event) {
-      throw new NotFoundError(
-        "Event not found"
-      );
+      throw AppError.notFound("User not found");
     }
 
     if (
       event.creatorId !== creatorId
     ) {
-      throw new ForbiddenError(
-        "Not your event"
-      );
+      throw AppError.forbidden("Access denied");
     }
 
     await prisma.event.delete({

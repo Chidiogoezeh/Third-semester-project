@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { verifyToken } from "../shared/utils/jwt";
-import { UnauthorizedError } from "../shared/errors/unauthorized";
+import { AppError } from "../shared/errors/appError";
 import { prisma } from "../config/database";
 
 export async function authMiddleware(
@@ -12,7 +12,7 @@ export async function authMiddleware(
     const authHeader = req.headers.authorization;
 
     if (!authHeader?.startsWith("Bearer ")) {
-      throw new UnauthorizedError("Missing token");
+      throw AppError.unauthorized("Missing token");
     }
 
     const token = authHeader.split(" ")[1];
@@ -27,7 +27,7 @@ export async function authMiddleware(
     });
 
     if (!user) {
-      throw new UnauthorizedError("User not found");
+      throw AppError.unauthorized("Invalid user");
     }
 
     req.user = decoded;

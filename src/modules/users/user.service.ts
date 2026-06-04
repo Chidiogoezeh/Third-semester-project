@@ -1,5 +1,4 @@
-import { NotFoundError } from "../../shared/errors/notFound";
-import { ConflictError } from "../../shared/errors/conflict";
+import { AppError } from "../../shared/errors/appError";
 import { prisma } from "../../config/database";
 
 export class UserService {
@@ -12,7 +11,7 @@ export class UserService {
       });
 
     if (!user) {
-      throw new NotFoundError(
+      throw AppError.notFound(
         "User not found"
       );
     }
@@ -32,7 +31,7 @@ export class UserService {
       });
 
     if (!user) {
-      throw new NotFoundError(
+      throw AppError.notFound(
         "User not found"
       );
     }
@@ -52,7 +51,7 @@ export class UserService {
         existingUser &&
         existingUser.id !== id
       ) {
-        throw new ConflictError(
+        throw AppError.conflict(
           "Email already in use"
         );
       }

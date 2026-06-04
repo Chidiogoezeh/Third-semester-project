@@ -1,5 +1,4 @@
-import { BadRequestError } from "../../shared/errors/badRequest";
-import { ConflictError } from "../../shared/errors/conflict";
+import { AppError } from "../../shared/errors/appError";
 import { prisma } from "../../config/database";
 
 export class TicketService {
@@ -18,7 +17,7 @@ export class TicketService {
       });
 
     if (!ticket) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "Invalid ticket"
       );
     }
@@ -27,7 +26,7 @@ export class TicketService {
       ticket.event.creatorId !==
       creatorId
     ) {
-      throw new BadRequestError(
+      throw AppError.badRequest(
         "You are not authorized to verify tickets for this event"
       );
     }
@@ -47,7 +46,7 @@ export class TicketService {
       result.count;
 
     if (updated === 0) {
-      throw new ConflictError(
+      throw AppError.conflict(
         "Ticket already scanned"
       );
     }
