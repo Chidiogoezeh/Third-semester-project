@@ -9,11 +9,22 @@ export class AnalyticsService {
         where: {
           creatorId
         },
-        include: {
-          tickets: true,
+        select: {
+          id: true,
+          title: true,
+
+          tickets: {
+            select: {
+              isScanned: true
+            }
+          },
+
           payments: {
             where: {
               status: "SUCCESS"
+            },
+            select: {
+              amount: true
             }
           }
         }
