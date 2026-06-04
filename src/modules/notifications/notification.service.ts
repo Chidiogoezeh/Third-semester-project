@@ -1,15 +1,21 @@
 import { EmailService } from "./email.service";
-import { paymentSuccessTemplate, reminderTemplate, ticketTemplate } from "./templates";
-import { PaymentSuccessTemplateData, ReminderTemplateData, TicketTemplateData } from "./notification.types";
+import {
+  paymentTemplate,
+  reminderTemplate,
+  ticketTemplate,
+  PaymentTemplateData,
+  ReminderTemplateData,
+  TicketTemplateData
+} from "./templates";
 
 const emailService = new EmailService();
 
 export class NotificationService {
   async sendPaymentSuccessEmail(
-    data: PaymentSuccessTemplateData
+    data: PaymentTemplateData
   ) {
     const html =
-      paymentSuccessTemplate(data);
+      paymentTemplate(data);
 
     return emailService.sendEmail({
       to: data.email,
