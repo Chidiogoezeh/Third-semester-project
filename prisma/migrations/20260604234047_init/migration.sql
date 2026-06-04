@@ -2,7 +2,7 @@
 CREATE TYPE "Role" AS ENUM ('CREATOR', 'EVENTEE');
 
 -- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'SUCCESS', 'FAILED', 'ABANDONED', 'REFUNDED');
+CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'SUCCESS', 'FAILED');
 
 -- CreateTable
 CREATE TABLE "users" (
