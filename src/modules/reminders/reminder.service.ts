@@ -16,9 +16,12 @@ export class ReminderService {
       await repository.create(data);
 
     const event =
-      await prisma.event.findUnique({
-        where: {
-          id: data.eventId
+      await prisma.event.create({
+        data: {
+          title,
+          eventDate,
+          reminderTemplates:
+            reminderTemplates ?? [24]
         }
       });
 

@@ -8,7 +8,6 @@ import { env } from "./config/env";
 import { apiLimiter } from "./middleware/rateLimit.middleware";
 import { errorMiddleware } from "./middleware/error.middleware";
 import { notFoundMiddleware } from "./middleware/notFound.middleware";
-import reminderTemplateRoutes from "./modules/reminder-template/reminderTemplate.routes";
 
 const app = express();
 
@@ -41,11 +40,6 @@ app.use(
 );
 
 app.use("/api/v1", routes);
-
-app.use(
-  "/api/v1",
-  reminderTemplateRoutes
-);
 
 app.use(notFoundMiddleware);
 

@@ -41,7 +41,7 @@ model Event {
   creatorId String
 
   title       String
-  slug        String  @unique
+  slug        String @unique
   description String
   bannerUrl   String?
 
@@ -55,6 +55,8 @@ model Event {
 
   reminderWindow Int @default(24)
 
+  reminderTemplates Json?
+
   createdAt DateTime @default(now())
 
   creator User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
@@ -62,8 +64,6 @@ model Event {
   tickets   Ticket[]
   reminders Reminder[]
   payments  Payment[]
-
-  reminderTemplates EventReminderTemplate[]
 
   @@index([creatorId])
   @@map("events")
@@ -151,20 +151,4 @@ model Reminder {
   @@index([eventId])
   @@index([userId])
   @@map("reminders")
-}
-
-model EventReminderTemplate {
-  id String @id @default(uuid())
-
-  eventId String
-
-  offset Int
-
-  createdAt DateTime @default(now())
-
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@index([eventId])
-  @@unique([eventId, offset])
-  @@map("event_reminder_templates")
 }

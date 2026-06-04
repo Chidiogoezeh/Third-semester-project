@@ -44,8 +44,16 @@ export class EventService {
     const event =
       await repository.create({
         ...data,
+
+        reminderTemplates:
+          data.reminderTemplates ?? [24],
+
         slug,
-        eventDate: new Date(data.eventDate),
+
+        eventDate: new Date(
+          data.eventDate
+        ),
+
         creator: {
           connect: {
             id: creatorId

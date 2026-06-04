@@ -6,8 +6,7 @@ import { NotificationService } from "../notifications/notification.service";
 import { BadRequestError } from "../../shared/errors/badRequest";
 import {  generateQRCode } from "../../shared/utils/qr";
 import { PaystackService } from "./paystack.service";
-import { ReminderTemplateApplicationService }
-from "../reminder-template/reminderTemplateApplication.service";
+import { scheduleReminder } from "../reminders/reminder.worker";
 
 const repository = new PaymentRepository();
 
@@ -16,8 +15,6 @@ const webhookService = new WebhookService();
 const notificationService = new NotificationService();
 
 const paystackService = new PaystackService();
-
-const reminderTemplateApplication = new ReminderTemplateApplicationService();
 
 export class PaymentService {
   async createBookingSession(
@@ -217,15 +214,49 @@ export class PaymentService {
         }
       );
 
-    await reminderTemplateApplication.applyTemplates(
-      payment.eventId,
-      payment.eventeeId
-    );
-
     const qrCode =
       await generateQRCode(
         result.ticket.ticketToken
       );
+
+    const offsets =
+      (payment.event
+        .reminderTemplates as number[]) ??
+      [24];
+
+    for (const offset of offsets) {
+      const reminder =
+        await prisma.reminder.create({
+          data: {
+            eventId:
+              payment.eventId,
+            userId:
+              payment.eventeeId,
+            reminderOffset:
+              offset
+          }
+        });
+
+      await scheduleReminder({
+        reminderId:
+          reminder.id,
+
+        email:
+          payment.eventee.email,
+
+        eventTitle:
+          payment.event.title,
+
+        eventDate:
+          payment.event.eventDate,
+
+        location:
+          payment.event.location,
+
+        reminderOffset:
+          offset
+      });
+    }
 
     await notificationService.sendTicketEmail({
       email:
