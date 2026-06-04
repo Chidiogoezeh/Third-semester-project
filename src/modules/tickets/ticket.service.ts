@@ -1,9 +1,6 @@
-import { TicketRepository } from "./ticket.repository";
 import { BadRequestError } from "../../shared/errors/badRequest";
 import { ConflictError } from "../../shared/errors/conflict";
-
-const repository =
-  new TicketRepository();
+import { prisma } from "../../config/database";
 
 export class TicketService {
   async verifyTicket(
@@ -11,9 +8,14 @@ export class TicketService {
     creatorId: string
   ) {
     const ticket =
-      await repository.findByToken(
-        ticketToken
-      );
+      await prisma.ticket.findUnique({
+        where: {
+          ticketToken
+        },
+        include: {
+          event: true
+        }
+      });
 
     if (!ticket) {
       throw new BadRequestError(
@@ -30,10 +32,19 @@ export class TicketService {
       );
     }
 
+    const result =
+      await prisma.ticket.updateMany({
+        where: {
+          ticketToken,
+          scannedAt: null
+        },
+        data: {
+          scannedAt: new Date()
+        }
+      });
+
     const updated =
-      await repository.scanTicket(
-        ticketToken
-      );
+      result.count;
 
     if (updated === 0) {
       throw new ConflictError(

@@ -1,10 +1,6 @@
 import { prisma } from "../../config/database";
-import { ReminderRepository } from "./reminder.repository";
 import { scheduleReminder } from "./reminder.worker";
 import { NotFoundError } from "../../shared/errors/notFound";
-
-const repository =
-  new ReminderRepository();
 
 export class ReminderService {
   async createReminder(data: {
@@ -13,7 +9,9 @@ export class ReminderService {
     reminderOffset: number;
   }) {
     const reminder =
-      await repository.create(data);
+      await prisma.reminder.create({
+        data
+      });
 
     const event =
       await prisma.event.findUnique({

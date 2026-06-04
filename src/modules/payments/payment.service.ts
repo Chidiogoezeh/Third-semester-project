@@ -1,13 +1,10 @@
 import crypto from "crypto";
 import { prisma } from "../../config/database";
-import { PaymentRepository } from "./payment.repository";
 import { NotificationService } from "../notifications/notification.service";
 import { BadRequestError } from "../../shared/errors/badRequest";
 import {  generateQRCode } from "../../shared/utils/qr";
 import { PaystackService } from "./paystack.service";
 import { scheduleReminder } from "../reminders/reminder.worker";
-
-const repository = new PaymentRepository();
 
 const notificationService = new NotificationService();
 
@@ -101,12 +98,14 @@ export class PaymentService {
       });
 
     const payment =
-      await repository.create({
-        eventId,
-        eventeeId,
-        amount: event.price,
-        reference,
-        status: "PENDING"
+      await prisma.payment.create({
+        data: {
+          eventId,
+          eventeeId,
+          amount: event.price,
+          reference,
+          status: "PENDING"
+        }
       });
 
     return {
@@ -123,9 +122,16 @@ export class PaymentService {
     reference: string
   ) {
     const payment =
-      await repository.findByReference(
-        reference
-      );
+      await prisma.payment.findUnique({
+        where: {
+          reference
+        },
+        include: {
+          ticket: true,
+          event: true,
+          eventee: true
+        }
+      });
 
     if (!payment) {
       throw new BadRequestError(
@@ -297,9 +303,16 @@ export class PaymentService {
     webhookEvent.data.reference;
 
   const payment =
-    await repository.findByReference(
-      reference
-    );
+    await prisma.payment.findUnique({
+      where: {
+        reference
+      },
+      include: {
+        ticket: true,
+        event: true,
+        eventee: true
+      }
+    });
 
   if (!payment) {
     throw new BadRequestError(
@@ -340,9 +353,16 @@ export class PaymentService {
     reference: string
   ) {
     const payment =
-      await repository.findByReference(
-        reference
-      );
+      await prisma.payment.findUnique({
+        where: {
+          reference
+        },
+        include: {
+          ticket: true,
+          event: true,
+          eventee: true
+        }
+      });
 
     if (!payment) {
       throw new BadRequestError(

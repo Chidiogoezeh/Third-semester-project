@@ -1,9 +1,7 @@
 import { hashPassword, comparePassword } from "../../shared/utils/password";
-import { AuthRepository } from "./auth.repository";
 import { BadRequestError } from "../../shared/errors/badRequest";
 import { generateToken } from "../../shared/utils/jwt";
-
-const repository = new AuthRepository();
+import { prisma } from "../../config/database";
 
 export class AuthService {
   async register(data: {
@@ -12,9 +10,11 @@ export class AuthService {
     role: "CREATOR" | "EVENTEE";
   }) {
     const existingUser =
-      await repository.findByEmail(
-        data.email
-      );
+      await prisma.user.findUnique({
+        where: {
+          email: data.email
+        }
+      });
 
     if (existingUser) {
       throw new BadRequestError(
@@ -28,9 +28,11 @@ export class AuthService {
       );
 
     const user =
-      await repository.createUser({
-        ...data,
-        password: hashedPassword
+      await prisma.user.create({
+        data: {
+          ...data,
+          password: hashedPassword
+        }
       });
 
     const token = generateToken({
@@ -55,9 +57,11 @@ export class AuthService {
     password: string;
   }) {
     const user =
-      await repository.findByEmail(
-        data.email
-      );
+      await prisma.user.findUnique({
+        where: {
+          email: data.email
+        }
+      });
 
     if (!user) {
       throw new BadRequestError(
