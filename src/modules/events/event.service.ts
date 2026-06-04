@@ -1,11 +1,9 @@
-import { EventRepository } from "./event.repository";
 import { generateSlug } from "../../shared/utils/slug";
 import { ForbiddenError } from "../../shared/errors/forbidden";
 import { NotFoundError } from "../../shared/errors/notFound";
 import { CreateEventDto, UpdateEventDto } from "./event.validation";
 import { redis } from "../../config/redis";
-
-const repository = new EventRepository();
+import { prisma } from "../../config/database";
 
 export class EventService {
   private async invalidateEventCaches(
@@ -33,30 +31,32 @@ export class EventService {
       generateSlug(data.title);
 
     const existing =
-      await repository.findByTitleSlug(
-        slug
-      );
+      await prisma.event.findUnique({
+        where: { slug }
+      });
 
     if (existing) {
       slug = `${slug}-${Date.now()}`;
     }
 
     const event =
-      await repository.create({
-        ...data,
+      await prisma.event.create({
+        data: {
+          ...data,
 
-        reminderTemplates:
-          data.reminderTemplates ?? [24],
+          reminderTemplates:
+            data.reminderTemplates ?? [24],
 
-        slug,
+          slug,
 
-        eventDate: new Date(
-          data.eventDate
-        ),
+          eventDate: new Date(
+            data.eventDate
+          ),
 
-        creator: {
-          connect: {
-            id: creatorId
+          creator: {
+            connect: {
+              id: creatorId
+            }
           }
         }
       });
@@ -85,11 +85,23 @@ export class EventService {
     const skip = (page - 1) * limit;
 
     const events =
-      await repository.findAll(
+      await prisma.event.findMany({
         skip,
-        limit,
-        search
-      );
+        take: limit,
+
+        where: search
+          ? {
+              title: {
+                contains: search,
+                mode: "insensitive"
+              }
+            }
+          : undefined,
+
+        orderBy: {
+          createdAt: "desc"
+        }
+      });
 
     if (redis) {
       await redis.set(
@@ -116,7 +128,9 @@ export class EventService {
     }
 
     const event =
-      await repository.findBySlug(slug);
+      await prisma.event.findUnique({
+        where: { slug }
+      });
 
     if (!event) {
       throw new NotFoundError(
@@ -137,7 +151,15 @@ export class EventService {
   }
 
   async getCreatorEvents(creatorId: string) {
-    return repository.findCreatorEvents(creatorId);
+        return prisma.event.findMany({
+      where: {
+        creatorId
+      },
+
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
   }
 
   async getEventAttendees(
@@ -145,7 +167,11 @@ export class EventService {
     creatorId: string
   ) {
     const event =
-      await repository.findById(eventId);
+      await prisma.event.findUnique({
+        where: {
+          id: eventId
+        }
+      });
 
     if (!event) {
       throw new NotFoundError(
@@ -162,9 +188,19 @@ export class EventService {
     }
 
     const attendees =
-      await repository.findEventAttendees(
-        eventId
-      );
+      await prisma.ticket.findMany({
+        where: {
+          eventId
+        },
+
+        include: {
+          eventee: {
+            select: {
+              email: true
+            }
+          }
+        }
+      });
 
     return attendees.map(
       attendee => ({
@@ -184,7 +220,11 @@ export class EventService {
     data: UpdateEventDto
   ) {
     const event =
-      await repository.findById(eventId);
+      await prisma.event.findUnique({
+        where: {
+          id: eventId
+        }
+      });
 
     if (!event) {
       throw new NotFoundError(
@@ -201,15 +241,19 @@ export class EventService {
     }
 
     const updated =
-      await repository.update(
-        eventId,
-        {
+      await prisma.event.update({
+        where: {
+          id: eventId
+        },
+
+        data: {
           ...data,
+
           eventDate: data.eventDate
             ? new Date(data.eventDate)
             : undefined
         }
-      );
+      });
 
     await this.invalidateEventCaches(
       event.slug
@@ -223,7 +267,11 @@ export class EventService {
     creatorId: string
   ) {
     const event =
-      await repository.findById(eventId);
+      await prisma.event.findUnique({
+        where: {
+          id: eventId
+        }
+      });
 
     if (!event) {
       throw new NotFoundError(
@@ -239,7 +287,11 @@ export class EventService {
       );
     }
 
-    await repository.delete(eventId);
+    await prisma.event.delete({
+      where: {
+        id: eventId
+      }
+    });
 
     await this.invalidateEventCaches(
       event.slug
