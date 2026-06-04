@@ -1,6 +1,6 @@
 import { prisma } from "../../config/database";
 import { ReminderRepository } from "./reminder.repository";
-import { scheduleReminder } from "./reminder.scheduler";
+import { scheduleReminder } from "./reminder.worker";
 import { NotFoundError } from "../../shared/errors/notFound";
 
 const repository =
@@ -16,12 +16,9 @@ export class ReminderService {
       await repository.create(data);
 
     const event =
-      await prisma.event.create({
-        data: {
-          title,
-          eventDate,
-          reminderTemplates:
-            reminderTemplates ?? [24]
+      await prisma.event.findUnique({
+        where: {
+          id: data.eventId
         }
       });
 
