@@ -1,36 +1,57 @@
-import { AnalyticsRepository } from "./analytics.repository";
-
-const repository =
-  new AnalyticsRepository();
+import { prisma } from "../../config/database";
 
 export class AnalyticsService {
   async getDashboard(
     creatorId: string
   ) {
     const events =
-      await repository.getCreatorEvents(
-        creatorId
-      );
+      await prisma.event.findMany({
+        where: {
+          creatorId
+        },
+        include: {
+          tickets: true,
+          payments: {
+            where: {
+              status: "SUCCESS"
+            }
+          }
+        }
+      });
+
+    const revenueResult =
+      await prisma.payment.aggregate({
+        _sum: {
+          amount: true
+        },
+        where: {
+          status: "SUCCESS",
+          event: {
+            creatorId
+          }
+        }
+      });
 
     const revenue =
-      await repository.getSuccessfulRevenue(
-        creatorId
+      revenueResult._sum.amount ?? 0;
+
+    const ticketsSold =
+      events.reduce(
+        (acc, event) =>
+          acc + event.tickets.length,
+        0
       );
 
-    const ticketsSold = events.reduce(
-      (acc, event) =>
-        acc + event.tickets.length,
-      0
-    );
-
-    const attendance = events.reduce(
-      (acc, event) =>
-        acc +
-        event.tickets.filter(
-          ticket => ticket.isScanned
-        ).length,
-      0
-    );
+    const attendance =
+      events.reduce(
+        (acc, event) =>
+          acc +
+          event.tickets.filter(
+            ticket =>
+              ticket.isScanned
+          ).length,
+        0
+      );
 
     const scanRate =
       ticketsSold === 0
@@ -46,7 +67,8 @@ export class AnalyticsService {
 
         const scannedTickets =
           event.tickets.filter(
-            ticket => ticket.isScanned
+            ticket =>
+              ticket.isScanned
           ).length;
 
         const eventRevenue =
@@ -74,18 +96,15 @@ export class AnalyticsService {
       ticketsSold,
       attendance,
       scanRate,
-
       revenuePerEvent:
         events.length === 0
           ? 0
           : revenue / events.length,
-
       ticketsPerEvent:
         events.length === 0
           ? 0
           : ticketsSold /
             events.length,
-
       events: eventAnalytics
     };
   }
