@@ -28,6 +28,7 @@ CREATE TABLE "events" (
     "capacity" INTEGER,
     "eventDate" TIMESTAMP(3) NOT NULL,
     "reminderWindow" INTEGER NOT NULL DEFAULT 24,
+    "reminderTemplates" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "events_pkey" PRIMARY KEY ("id")
@@ -70,16 +71,6 @@ CREATE TABLE "reminders" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "reminders_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "event_reminder_templates" (
-    "id" TEXT NOT NULL,
-    "eventId" TEXT NOT NULL,
-    "offset" INTEGER NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "event_reminder_templates_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -127,12 +118,6 @@ CREATE INDEX "reminders_userId_idx" ON "reminders"("userId");
 -- CreateIndex
 CREATE UNIQUE INDEX "reminders_eventId_userId_reminderOffset_key" ON "reminders"("eventId", "userId", "reminderOffset");
 
--- CreateIndex
-CREATE INDEX "event_reminder_templates_eventId_idx" ON "event_reminder_templates"("eventId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "event_reminder_templates_eventId_offset_key" ON "event_reminder_templates"("eventId", "offset");
-
 -- AddForeignKey
 ALTER TABLE "events" ADD CONSTRAINT "events_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -156,6 +141,3 @@ ALTER TABLE "reminders" ADD CONSTRAINT "reminders_eventId_fkey" FOREIGN KEY ("ev
 
 -- AddForeignKey
 ALTER TABLE "reminders" ADD CONSTRAINT "reminders_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "event_reminder_templates" ADD CONSTRAINT "event_reminder_templates_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "events"("id") ON DELETE CASCADE ON UPDATE CASCADE;
