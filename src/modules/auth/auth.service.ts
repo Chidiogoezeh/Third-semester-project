@@ -9,10 +9,12 @@ export class AuthService {
     password: string;
     role: "CREATOR" | "EVENTEE";
   }) {
+    const email = data.email.toLowerCase();
+
     const existingUser =
       await prisma.user.findUnique({
         where: {
-          email: data.email
+          email
         }
       });
 
@@ -30,8 +32,9 @@ export class AuthService {
     const user =
       await prisma.user.create({
         data: {
-          ...data,
-          password: hashedPassword
+          email,
+          password: hashedPassword,
+          role: data.role
         }
       });
 
@@ -56,10 +59,12 @@ export class AuthService {
     email: string;
     password: string;
   }) {
+    const email = data.email.toLowerCase();
+
     const user =
       await prisma.user.findUnique({
         where: {
-          email: data.email
+          email
         }
       });
 
