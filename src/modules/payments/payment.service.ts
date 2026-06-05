@@ -130,6 +130,7 @@ export class PaymentService {
         include: {
           event: {
             select: {
+              id: true,
               title: true
             }
           },
@@ -146,21 +147,55 @@ export class PaymentService {
         }
       });
 
+    const revenueResult =
+      await prisma.payment.aggregate({
+        _sum: {
+          amount: true
+        },
+        where: {
+          status: "SUCCESS",
+          event: {
+            creatorId
+          }
+        }
+      });
+
     const totalRevenue =
-      payments
-        .filter(
-          payment =>
-            payment.status === "SUCCESS"
-        )
-        .reduce(
-          (sum, payment) =>
-            sum + payment.amount,
-          0
-        );
+      revenueResult._sum.amount ?? 0;
+
+    const successfulPayments =
+      payments.filter(
+        payment =>
+          payment.status === "SUCCESS"
+      );
+
+    const failedPayments =
+      payments.filter(
+        payment =>
+          payment.status === "FAILED"
+      );
+
+    const pendingPayments =
+      payments.filter(
+        payment =>
+          payment.status === "PENDING"
+      );
 
     return {
       totalRevenue,
-      totalPayments: payments.length,
+
+      totalPayments:
+        payments.length,
+
+      successfulPayments:
+        successfulPayments.length,
+
+      failedPayments:
+        failedPayments.length,
+
+      pendingPayments:
+        pendingPayments.length,
+
       payments
     };
   }

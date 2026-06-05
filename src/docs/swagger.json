@@ -86,7 +86,23 @@
     "/api/v1/payments/creator": {
       "get": {
         "summary": "Get creator payment records",
-        "tags": ["Payments"]
+        "tags": ["Payments"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment records fetched"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Creator access required"
+          }
+        }
       }
     },
     "/api/v1/payments/webhook": {

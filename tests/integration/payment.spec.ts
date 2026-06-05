@@ -29,3 +29,17 @@ describe("Payment API", () => {
     );
   });
 });
+
+it(
+  "should reject creator payments endpoint without token",
+  async () => {
+    const response =
+      await request(app).get(
+        "/api/v1/payments/creator"
+      );
+
+    expect(response.status).toBe(
+      401
+    );
+  }
+);
