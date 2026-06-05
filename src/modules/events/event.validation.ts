@@ -3,6 +3,9 @@ import { z } from "zod";
 export const createEventSchema = z.object({
   title: z.string().min(3),
   description: z.string().min(10),
+
+  bannerUrl: z.string().url().optional(),
+
   location: z.string(),
   price: z.coerce.number().min(0),
   capacity: z.coerce.number().int().positive().optional(),
@@ -13,6 +16,9 @@ export const createEventSchema = z.object({
 export const updateEventSchema = z.object({
   title: z.string().min(3).optional(),
   description: z.string().min(10).optional(),
+
+  bannerUrl: z.string().url().optional(),
+
   location: z.string().optional(),
   price: z.coerce.number().min(0).optional(),
   capacity: z.coerce.number().int().positive().optional(),

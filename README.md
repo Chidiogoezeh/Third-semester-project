@@ -1,229 +1,248 @@
-# Eventful Backend Capstone Project
+# Eventful Backend
 
-An event management and ticketing platform built with a modular service-oriented architecture. Eventful enables organizers to create and manage events, process ticket sales, verify attendance through QR-based check-ins, and monitor business analytics through a scalable backend infrastructure.
-
----
-
-## Technology Stack
-
-### Core
-
-- Node.js
-- TypeScript
-- Express.js
-
-### Data Layer
-
-- PostgreSQL
-- Prisma
-
-### Authentication & Security
-
-- JWT Authentication
-- Role-Based Access Control (RBAC)
-- bcrypt Password Hashing
-
-### Background Processing
-
-- Redis
-- BullMQ
-
-### Payments
-
-- Paystack Integration
+A scalable event management and ticketing platform built with **Node.js**, **TypeScript**, and **Express.js**. Eventful enables creators to manage events, sell tickets, verify attendance through QR codes, send reminders, process payments, and monitor event performance through analytics.
 
 ---
 
-## Core Capabilities
+## Tech Stack
+
+| Layer           | Technology        |
+| --------------- | ----------------- |
+| Runtime         | Node.js           |
+| Language        | TypeScript        |
+| Framework       | Express.js        |
+| Database        | PostgreSQL        |
+| ORM             | Prisma            |
+| Cache           | Redis             |
+| Authentication  | JWT, bcrypt       |
+| Payments        | Paystack          |
+| Background Jobs | BullMQ            |
+| Testing         | Jest, Supertest   |
+| Documentation   | Swagger / Postman |
+
+---
+
+## Features
 
 ### Authentication & Authorization
 
 - User registration and login
-- JWT-based authentication
-- Protected route access
-- Role-based permissions
+- JWT authentication
+- Role-Based Access Control (RBAC)
+
+**Roles**
+
+- **Creator** – Creates and manages events
+- **Eventee** – Discovers events and purchases tickets
 
 ### Event Management
 
-- Event creation and publishing
-- Event discovery and listing
-- Event updates and lifecycle management
-- Organizer-owned event management
+Creators can:
 
-### Ticketing
+- Create, update, and delete events
+- View attendees
+- Access analytics and payment records
 
-- Ticket reservation and issuance
-- Unique ticket token generation
+Eventees can:
+
+- Browse and search events
+- View event details
+- Purchase tickets
+
+### Ticketing & Verification
+
+- Ticket purchase workflow
 - QR code generation
-- Digital ticket validation
-
-### Payment Processing
-
-- Secure Paystack checkout
-- Payment verification
-- Webhook processing
-- Automatic ticket issuance after successful payment
-
-### Attendance Verification
-
-- QR-based event check-in
+- Digital ticket issuance
+- QR-based attendance verification
 - Duplicate scan prevention
-- Real-time validation status
-
-### Notifications & Reminders
-
-- Scheduled event reminders
-- Asynchronous job processing
-- Queue-driven background tasks
-
-### Analytics
-
-- Event attendance metrics
-- Ticket sales reporting
-- Revenue analytics
-- Check-in performance tracking
-
----
-
-## System Architecture
-
-The backend follows a layered architecture with clear separation of concerns.
-
-```text
-Client
-  │
-  ▼
-Routes
-  │
-  ▼
-Middleware
-  │
-  ▼
-Controllers
-  │
-  ▼
-Services
-  │
-  ▼
-PostgreSQL Database
-```
-
-### Architectural Patterns
-
-- Layered Architecture
-- Repository Pattern
-- Service-Oriented Modules
-- Queue-Based Background Processing
-- Event-Driven Payment Workflows
-
----
-
-## Domain Modules
-
-### Auth
-
-Manages user authentication, authorization, and identity lifecycle.
-
-### Users
-
-Handles user profiles and account management.
-
-### Events
-
-Manages event creation, publishing, discovery, and organizer operations.
-
-### Tickets
-
-Handles ticket issuance, QR generation, and verification workflows.
 
 ### Payments
 
-Processes payment initialization, verification, and reconciliation.
+- Paystack integration
+- Payment initialization and verification
+- Webhook handling
+- Automatic ticket generation after successful payment
 
-### Notifications
+### Reminders & Notifications
 
-Schedules and dispatches reminders and transactional communications.
+- Creator-configured reminders
+- User reminder preferences
+- Scheduled event notifications
+- Queue-based background processing
+
+### Event Sharing
+
+- Public event pages (`/events/:slug`)
+- Social sharing support for:
+  - WhatsApp
+  - Facebook
+  - X (Twitter)
+  - LinkedIn
 
 ### Analytics
 
-Aggregates attendance, sales, and revenue insights.
+Creators can view:
+
+- Total events created
+- Tickets sold
+- Total attendees
+- Event-specific attendance metrics
+- Scanned ticket statistics
 
 ---
 
-## Payment Lifecycle
+## Architecture
 
 ```text
-User Books Event
-        │
-        ▼
-Initialize Paystack Transaction
-        │
-        ▼
-User Completes Payment
-        │
-        ▼
-Paystack Webhook
-        │
-        ▼
-Verify Transaction
-        │
-        ▼
-Issue Ticket
-        │
-        ▼
-Generate QR Code
-        │
-        ▼
-Schedule Reminders
-        │
-        ▼
-Send Confirmation
+Client
+   │
+   ▼
+Express API
+   │
+   ├── PostgreSQL (Prisma)
+   ├── Redis Cache
+   ├── BullMQ Workers
+   └── Paystack
+```
+
+### Design Principles
+
+- Layered Architecture
+- Separation of Concerns
+- Service-Oriented Modules
+- Queue-Based Processing
+- Maintainable TypeScript Codebase
+
+---
+
+## Core Modules
+
+```text
+Auth
+Users
+Events
+Tickets
+Payments
+Reminders
+Analytics
+Notifications
 ```
 
 ---
 
-## Security Features
+## Payment Flow
+
+```text
+Book Ticket
+    │
+    ▼
+Initialize Paystack Payment
+    │
+    ▼
+Payment Success
+    │
+    ▼
+Verify Transaction
+    │
+    ▼
+Generate Ticket
+    │
+    ▼
+Generate QR Code
+    │
+    ▼
+Schedule Reminders
+```
+
+---
+
+## Security
 
 - JWT Authentication
-- Role-Based Access Control (RBAC)
-- Password Hashing
-- Request Validation
-- Rate Limiting
-- Helmet Security Headers
+- bcrypt Password Hashing
+- Input Validation
+- Protected Routes
+- Basic Rate Limiting
 - CORS Protection
 - Webhook Signature Verification
 
 ---
 
-## Infrastructure
+## API Overview
 
-### Database
+### Authentication
 
-- PostgreSQL
-- Prisma
+```http
+POST /auth/register
+POST /auth/login
+```
 
-### Caching & Queues
+### Events
 
-- Redis
-- BullMQ
+```http
+GET    /events
+GET    /events/:id
+POST   /events
+PATCH  /events/:id
+DELETE /events/:id
+```
 
-### File & Asset Handling
+### Tickets
 
-- QR Code Generation
-- Ticket Delivery Services
+```http
+POST /events/:id/book
+POST /tickets/verify
+```
+
+### Reminders
+
+```http
+POST /events/:id/reminders
+```
+
+### Analytics
+
+```http
+GET /analytics
+```
 
 ---
 
-## Deployment
+## Testing
 
-Designed for cloud-native deployment.
+### Unit Tests
 
-### Runtime
+- Services
+- Utility Functions
 
-- Node.js 22+
+### Integration Tests
+
+- Authentication Flow
+- Event Management Flow
+- Ticket Booking Flow
+- Payment Flow
+
+Tools:
+
+- Jest
+- Supertest
 
 ---
 
-## Project Goal
+## Project Objective
 
-Eventful demonstrates the design and implementation of a scalable event-ticketing backend that combines secure authentication, payment processing, ticket lifecycle management, attendance verification, background job processing, and analytics within a production-inspired architecture.
+Eventful demonstrates a production-inspired backend architecture that combines:
+
+- Authentication & Authorization
+- Event Management
+- Ticket Purchasing
+- QR Code Generation & Verification
+- Paystack Payments
+- Reminder Notifications
+- Event Analytics
+- Redis Caching
+- Rate Limiting
+- API Testing & Documentation
+
+Built as a capstone project to showcase scalable backend engineering practices using the Node.js ecosystem.
