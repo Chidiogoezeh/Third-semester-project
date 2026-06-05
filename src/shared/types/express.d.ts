@@ -1,12 +1,9 @@
 import "express-serve-static-core";
-import { Role } from "@prisma/client";
+import { AuthUser } from "./auth.types";
 
 declare module "express-serve-static-core" {
   interface Request {
-    user?: {
-      userId: AuthUser;
-      role: Role;
-    };
+    user?: AuthUser;
   }
 }
 
