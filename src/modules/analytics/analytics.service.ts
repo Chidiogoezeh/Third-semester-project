@@ -93,6 +93,8 @@ export class AnalyticsService {
           title: event.title,
           revenue: eventRevenue,
           ticketsSold: eventTickets,
+          attendees: scannedTickets,
+          scannedTickets,
           attendanceRate:
             eventTickets === 0
               ? 0
