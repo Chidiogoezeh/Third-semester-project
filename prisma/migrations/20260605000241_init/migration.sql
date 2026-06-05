@@ -11,6 +11,7 @@ CREATE TABLE "users" (
     "password" TEXT NOT NULL,
     "role" "Role" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -29,6 +30,7 @@ CREATE TABLE "events" (
     "eventDate" TIMESTAMP(3) NOT NULL,
     "reminderWindow" INTEGER NOT NULL DEFAULT 24,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "events_pkey" PRIMARY KEY ("id")
 );
@@ -43,6 +45,7 @@ CREATE TABLE "payments" (
     "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
     "paidAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "payments_pkey" PRIMARY KEY ("id")
 );
@@ -57,6 +60,7 @@ CREATE TABLE "tickets" (
     "isScanned" BOOLEAN NOT NULL DEFAULT false,
     "scannedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "tickets_pkey" PRIMARY KEY ("id")
 );
@@ -68,6 +72,7 @@ CREATE TABLE "reminders" (
     "userId" TEXT NOT NULL,
     "reminderOffset" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "reminders_pkey" PRIMARY KEY ("id")
 );
