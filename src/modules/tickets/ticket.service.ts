@@ -26,30 +26,28 @@ export class TicketService {
       ticket.event.creatorId !==
       creatorId
     ) {
-      throw AppError.badRequest(
+      throw AppError.forbidden(
         "You are not authorized to verify tickets for this event"
       );
     }
 
-    const result =
-      await prisma.ticket.updateMany({
-        where: {
-          ticketToken,
-          scannedAt: null
-        },
-        data: {
-          scannedAt: new Date()
-        }
-      });
-
-    const updated =
-      result.count;
-
-    if (updated === 0) {
+    if (ticket.isScanned) {
       throw AppError.conflict(
         "Ticket already scanned"
       );
     }
-    return updated;
+
+    const updatedTicket =
+      await prisma.ticket.update({
+        where: {
+          id: ticket.id
+        },
+        data: {
+          isScanned: true,
+          scannedAt: new Date()
+        }
+      });
+
+    return updatedTicket;
   }
 }
