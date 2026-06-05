@@ -10,8 +10,12 @@ export class EventService {
   ) {
     if (!redis) return;
 
-    await redis.flushdb();
-  }
+    const keys = await redis.keys("event*");
+
+    if (keys.length) {
+      await redis.del(...keys);
+    }
+      }
 
   async createEvent(
     creatorId: string,
