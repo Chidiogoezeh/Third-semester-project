@@ -3,11 +3,10 @@ import { EventController } from "./event.controller";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { roleMiddleware } from "../../middleware/role.middleware";
 import { validate } from "../../middleware/validate.middleware";
-import { createEventSchema } from "./event.validation";
+import { createEventSchema, updateEventSchema, idParamSchema } from "./event.validation";
 import { ReminderController } from "../reminders/reminder.controller";
 import { PaymentController } from "../payments/payment.controller";
 import { asyncHandler } from "../../shared/utils/asyncHandler";
-import { updateEventSchema } from "./event.validation";
 
 const router = Router();
 
@@ -35,9 +34,8 @@ router.get(
   "/:id/attendees",
   authMiddleware,
   roleMiddleware("CREATOR"),
-  asyncHandler(
-    controller.attendees
-  )
+  validate(idParamSchema, "params"),
+  asyncHandler(controller.attendees)
 );
 
 router.get(
@@ -57,6 +55,7 @@ router.post(
   "/:id/book",
   authMiddleware,
   roleMiddleware("EVENTEE"),
+  validate(idParamSchema, "params"),
   asyncHandler(
     paymentController.initializeBooking
   )
@@ -66,6 +65,7 @@ router.post(
   "/:id/reminders",
   authMiddleware,
   roleMiddleware("EVENTEE"),
+  validate(idParamSchema, "params"),
   asyncHandler(reminderController.create)
 );
 
@@ -73,6 +73,7 @@ router.patch(
   "/:id",
   authMiddleware,
   roleMiddleware("CREATOR"),
+  validate(idParamSchema, "params"),
   validate(updateEventSchema),
   asyncHandler(controller.update)
 );
@@ -81,6 +82,7 @@ router.delete(
   "/:id",
   authMiddleware,
   roleMiddleware("CREATOR"),
+  validate(idParamSchema, "params"),
   asyncHandler(controller.delete)
 );
 

@@ -25,3 +25,7 @@ export type CreateEventDto =
 
 export type UpdateEventDto =
   z.infer<typeof updateEventSchema>;
+
+export const idParamSchema = z.object({
+  id: z.string().uuid()
+});
