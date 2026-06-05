@@ -97,24 +97,22 @@ export class PaymentService {
         reference
       });
 
-    const payment =
-      await prisma.payment.create({
-        data: {
-          eventId,
-          eventeeId,
-          amount: event.price,
-          reference,
-          status: "PENDING"
-        }
-      });
+    await prisma.payment.create({
+      data: {
+        eventId,
+        eventeeId,
+        amount: event.price,
+        reference,
+        status: "PENDING"
+      }
+    });
 
     return {
-        paymentId: payment.id,
-        reference,
-        authorizationUrl:
-          checkout.authorization_url,
-        accessCode:
-          checkout.access_code
+      reference,
+      authorizationUrl:
+        checkout.authorization_url,
+      accessCode:
+        checkout.access_code
     };
   }
 
@@ -221,10 +219,6 @@ export class PaymentService {
       await generateQRCode(
         result.ticket.ticketToken
       );
-
-    const offsets = [
-      payment.event.reminderWindow
-    ];
 
     const reminder =
       await prisma.reminder.create({
