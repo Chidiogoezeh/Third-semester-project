@@ -6,7 +6,7 @@ CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'SUCCESS', 'FAILED');
 
 -- CreateTable
 CREATE TABLE "users" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "role" "Role" NOT NULL,
@@ -18,8 +18,8 @@ CREATE TABLE "users" (
 
 -- CreateTable
 CREATE TABLE "events" (
-    "id" TEXT NOT NULL,
-    "creatorId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "creatorId" UUID NOT NULL,
     "title" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "description" TEXT NOT NULL,
@@ -37,9 +37,9 @@ CREATE TABLE "events" (
 
 -- CreateTable
 CREATE TABLE "payments" (
-    "id" TEXT NOT NULL,
-    "eventId" TEXT NOT NULL,
-    "eventeeId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "eventId" UUID NOT NULL,
+    "eventeeId" UUID NOT NULL,
     "reference" TEXT NOT NULL,
     "amount" INTEGER NOT NULL,
     "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
@@ -52,10 +52,10 @@ CREATE TABLE "payments" (
 
 -- CreateTable
 CREATE TABLE "tickets" (
-    "id" TEXT NOT NULL,
-    "eventId" TEXT NOT NULL,
-    "eventeeId" TEXT NOT NULL,
-    "paymentId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "eventId" UUID NOT NULL,
+    "eventeeId" UUID NOT NULL,
+    "paymentId" UUID NOT NULL,
     "ticketToken" TEXT NOT NULL,
     "isScanned" BOOLEAN NOT NULL DEFAULT false,
     "scannedAt" TIMESTAMP(3),
@@ -67,9 +67,9 @@ CREATE TABLE "tickets" (
 
 -- CreateTable
 CREATE TABLE "reminders" (
-    "id" TEXT NOT NULL,
-    "eventId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "eventId" UUID NOT NULL,
+    "userId" UUID NOT NULL,
     "reminderOffset" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -87,6 +87,12 @@ CREATE UNIQUE INDEX "events_slug_key" ON "events"("slug");
 CREATE INDEX "events_creatorId_idx" ON "events"("creatorId");
 
 -- CreateIndex
+CREATE INDEX "events_eventDate_idx" ON "events"("eventDate");
+
+-- CreateIndex
+CREATE INDEX "events_creatorId_eventDate_idx" ON "events"("creatorId", "eventDate");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "payments_reference_key" ON "payments"("reference");
 
 -- CreateIndex
@@ -97,6 +103,12 @@ CREATE INDEX "payments_eventeeId_idx" ON "payments"("eventeeId");
 
 -- CreateIndex
 CREATE INDEX "payments_status_idx" ON "payments"("status");
+
+-- CreateIndex
+CREATE INDEX "payments_eventId_status_idx" ON "payments"("eventId", "status");
+
+-- CreateIndex
+CREATE INDEX "payments_eventeeId_status_idx" ON "payments"("eventeeId", "status");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tickets_paymentId_key" ON "tickets"("paymentId");
@@ -111,6 +123,12 @@ CREATE INDEX "tickets_eventId_idx" ON "tickets"("eventId");
 CREATE INDEX "tickets_eventeeId_idx" ON "tickets"("eventeeId");
 
 -- CreateIndex
+CREATE INDEX "tickets_eventId_isScanned_idx" ON "tickets"("eventId", "isScanned");
+
+-- CreateIndex
+CREATE INDEX "tickets_eventId_scannedAt_idx" ON "tickets"("eventId", "scannedAt");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "tickets_eventId_eventeeId_key" ON "tickets"("eventId", "eventeeId");
 
 -- CreateIndex
@@ -118,6 +136,9 @@ CREATE INDEX "reminders_eventId_idx" ON "reminders"("eventId");
 
 -- CreateIndex
 CREATE INDEX "reminders_userId_idx" ON "reminders"("userId");
+
+-- CreateIndex
+CREATE INDEX "reminders_eventId_reminderOffset_idx" ON "reminders"("eventId", "reminderOffset");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "reminders_eventId_userId_reminderOffset_key" ON "reminders"("eventId", "userId", "reminderOffset");

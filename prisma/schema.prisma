@@ -19,10 +19,10 @@ enum PaymentStatus {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  role      Role
+  id       String @id @default(uuid()) @db.Uuid
+  email    String @unique
+  password String
+  role     Role
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -37,11 +37,11 @@ model User {
 }
 
 model Event {
-  id        String @id @default(uuid())
-  creatorId String
+  id        String @id @default(uuid()) @db.Uuid
+  creatorId String @db.Uuid
 
   title       String
-  slug        String @unique
+  slug        String  @unique
   description String
   bannerUrl   String?
 
@@ -65,14 +65,16 @@ model Event {
   payments  Payment[]
 
   @@index([creatorId])
+  @@index([eventDate])
+  @@index([creatorId, eventDate])
   @@map("events")
 }
 
 model Payment {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  eventId   String
-  eventeeId String
+  eventId   String @db.Uuid
+  eventeeId String @db.Uuid
 
   // Paystack transaction reference
   reference String @unique
@@ -98,17 +100,18 @@ model Payment {
   @@index([eventId])
   @@index([eventeeId])
   @@index([status])
+  @@index([eventId, status])
+  @@index([eventeeId, status])
   @@map("payments")
 }
 
 model Ticket {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  eventId   String
-  eventeeId String
+  eventId   String @db.Uuid
+  eventeeId String @db.Uuid
 
-  // Links ticket to successful payment
-  paymentId String @unique
+  paymentId String @unique @db.Uuid
 
   // QR code payload / verification token
   ticketToken String @unique
@@ -127,18 +130,19 @@ model Ticket {
 
   payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
-  // One ticket per user per event
   @@unique([eventId, eventeeId])
   @@index([eventId])
   @@index([eventeeId])
+  @@index([eventId, isScanned])
+  @@index([eventId, scannedAt])
   @@map("tickets")
 }
 
 model Reminder {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  eventId String
-  userId  String
+  eventId String @db.Uuid
+  userId  String @db.Uuid
 
   reminderOffset Int
 
@@ -152,5 +156,6 @@ model Reminder {
   @@unique([eventId, userId, reminderOffset])
   @@index([eventId])
   @@index([userId])
+  @@index([eventId, reminderOffset])
   @@map("reminders")
 }
