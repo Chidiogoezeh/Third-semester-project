@@ -30,6 +30,15 @@ export class ReminderService {
       );
     }
 
+    if (
+      user.role === "CREATOR" &&
+      event.creatorId !== user.id
+    ) {
+      throw AppError.forbidden(
+        "You can only configure reminders for your own events"
+      );
+    }
+
     const reminder =
       await prisma.reminder.upsert({
         where: {

@@ -64,7 +64,10 @@ router.post(
 router.post(
   "/:id/reminders",
   authMiddleware,
-  roleMiddleware("EVENTEE"),
+  roleMiddleware(
+    "EVENTEE",
+    "CREATOR"
+  ),
   validate(idParamSchema, "params"),
   asyncHandler(reminderController.create)
 );
