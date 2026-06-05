@@ -12,14 +12,3 @@ export function successResponse(
     data
   });
 }
-
-export function errorResponse(
-  res: Response,
-  message: string,
-  statusCode = 500
-) {
-  return res.status(statusCode).json({
-    success: false,
-    message
-  });
-}
