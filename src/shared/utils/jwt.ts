@@ -1,14 +1,9 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 import { env } from "../../config/env";
-import { Role } from "@prisma/client";
-
-type Payload = {
-  userId: string;
-  role: Role;
-};
+import { AuthUser } from "../types/auth.types";
 
 export function generateToken(
-  payload: Payload
+  payload: AuthUser
 ) {
   return jwt.sign(
     payload,
@@ -22,9 +17,9 @@ export function generateToken(
 
 export function verifyToken(
   token: string
-): Payload {
+): AuthUser {
   return jwt.verify(
     token,
     env.JWT_SECRET
-  ) as Payload;
+  ) as AuthUser;
 }
