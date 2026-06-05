@@ -1,4 +1,8 @@
-import { paystackConfig } from "../../config/paystack";
+import { env } from "../../config/env";
+import { AppError } from "../../shared/errors/appError";
+
+const PAYSTACK_BASE_URL =
+  "https://api.paystack.co";
 
 export class PaystackService {
   async initializeTransaction(data: {
@@ -7,11 +11,11 @@ export class PaystackService {
     reference: string;
   }) {
     const response = await fetch(
-      `${paystackConfig.App_Url}/transaction/initialize`,
+      `${PAYSTACK_BASE_URL}/transaction/initialize`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${paystackConfig.secretKey}`,
+          Authorization: `Bearer ${env.PAYSTACK_SECRET_KEY}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -25,8 +29,8 @@ export class PaystackService {
     const result = await response.json();
 
     if (!result.status) {
-      throw new Error(
-        result.message ||
+      throw AppError.badRequest(
+        result.message ??
         "Failed to initialize transaction"
       );
     }
