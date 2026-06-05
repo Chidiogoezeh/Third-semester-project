@@ -28,7 +28,7 @@ CREATE TABLE "events" (
     "price" INTEGER NOT NULL,
     "capacity" INTEGER,
     "eventDate" TIMESTAMP(3) NOT NULL,
-    "reminderWindow" INTEGER NOT NULL DEFAULT 24,
+    "creatorReminderOffsets" INTEGER[] DEFAULT ARRAY[24]::INTEGER[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
