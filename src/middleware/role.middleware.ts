@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
+import { Role } from "@prisma/client";
 import { AppError } from "../shared/errors/appError";
 
-export function roleMiddleware(...roles: string[]) {
+export function roleMiddleware(...roles: Role[]) {
   return (
     req: Request,
     _res: Response,
