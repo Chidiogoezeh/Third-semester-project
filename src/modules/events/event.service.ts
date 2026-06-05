@@ -119,7 +119,7 @@ export class EventService {
       });
 
     if (!event) {
-      throw AppError.notFound("User not found");
+      throw AppError.notFound("Event not found");
     }
 
     if (redis) {
@@ -158,7 +158,7 @@ export class EventService {
       });
 
     if (!event) {
-      throw AppError.notFound("User not found");
+      throw AppError.notFound("Event not found");
     }
 
     if (
@@ -207,7 +207,7 @@ export class EventService {
       });
 
     if (!event) {
-      throw AppError.notFound("User not found");
+      throw AppError.notFound("Event not found");
     }
 
     if (
@@ -250,7 +250,7 @@ export class EventService {
       });
 
     if (!event) {
-      throw AppError.notFound("User not found");
+      throw AppError.notFound("Event not found");
     }
 
     if (
