@@ -123,19 +123,42 @@ export class EventService {
       });
 
     if (!event) {
-      throw AppError.notFound("Event not found");
+      throw AppError.notFound(
+        "Event not found"
+      );
     }
+
+    const eventResponse = {
+      ...event,
+
+      share: {
+        url: `${process.env.CLIENT_URL}/events/${event.slug}`,
+
+        openGraph: {
+          title: event.title,
+          description: event.description,
+          image: event.bannerUrl
+        },
+
+        twitter: {
+          card: "summary_large_image",
+          title: event.title,
+          description: event.description,
+          image: event.bannerUrl
+        }
+      }
+    };
 
     if (redis) {
       await redis.set(
         cacheKey,
-        JSON.stringify(event),
+        JSON.stringify(eventResponse),
         "EX",
         300
       );
     }
 
-    return event;
+    return eventResponse;
   }
 
   async getCreatorEvents(creatorId: string) {
