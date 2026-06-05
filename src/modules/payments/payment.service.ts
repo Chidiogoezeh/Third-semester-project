@@ -220,13 +220,13 @@ export class PaymentService {
         result.ticket.ticketToken
       );
 
+    for (const offset of payment.event.creatorReminderOffsets) {
     const reminder =
       await prisma.reminder.create({
         data: {
           eventId: payment.eventId,
           userId: payment.eventeeId,
-          reminderOffset:
-            payment.event.reminderWindow
+          reminderOffset: offset
         }
       });
 
@@ -236,9 +236,9 @@ export class PaymentService {
       eventTitle: payment.event.title,
       eventDate: payment.event.eventDate,
       location: payment.event.location,
-      reminderOffset:
-        payment.event.reminderWindow
+      reminderOffset: offset
     });
+}
     
 
     await notificationService.sendTicketEmail({

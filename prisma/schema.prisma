@@ -53,7 +53,7 @@ model Event {
 
   eventDate DateTime
 
-  reminderWindow Int @default(24)
+  creatorReminderOffsets Int[] @default([24])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

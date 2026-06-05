@@ -10,7 +10,11 @@ export const createEventSchema = z.object({
   price: z.coerce.number().min(0),
   capacity: z.coerce.number().int().positive().optional(),
   eventDate: z.string().datetime(),
-  reminderWindow: z.coerce.number().optional()
+  creatorReminderOffsets: z
+    .array(
+      z.coerce.number().int().positive()
+    )
+    .optional()
 });
 
 export const updateEventSchema = z.object({
@@ -23,7 +27,11 @@ export const updateEventSchema = z.object({
   price: z.coerce.number().min(0).optional(),
   capacity: z.coerce.number().int().positive().optional(),
   eventDate: z.string().datetime().optional(),
-  reminderWindow: z.coerce.number().optional()
+  creatorReminderOffsets: z
+    .array(
+      z.coerce.number().int().positive()
+    )
+    .optional()
 });
 
 export type CreateEventDto =
