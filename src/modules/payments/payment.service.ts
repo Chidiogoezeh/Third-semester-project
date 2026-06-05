@@ -116,6 +116,55 @@ export class PaymentService {
     };
   }
 
+  async getCreatorPayments(
+    creatorId: string
+  ) {
+    const payments =
+      await prisma.payment.findMany({
+        where: {
+          event: {
+            creatorId
+          }
+        },
+
+        include: {
+          event: {
+            select: {
+              title: true
+            }
+          },
+
+          eventee: {
+            select: {
+              email: true
+            }
+          }
+        },
+
+        orderBy: {
+          createdAt: "desc"
+        }
+      });
+
+    const totalRevenue =
+      payments
+        .filter(
+          payment =>
+            payment.status === "SUCCESS"
+        )
+        .reduce(
+          (sum, payment) =>
+            sum + payment.amount,
+          0
+        );
+
+    return {
+      totalRevenue,
+      totalPayments: payments.length,
+      payments
+    };
+  }
+
   private async completePayment(
     reference: string
   ) {

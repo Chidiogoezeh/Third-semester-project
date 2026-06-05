@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import { PaymentController } from "./payment.controller";
 import { asyncHandler } from "../../shared/utils/asyncHandler";
 import { authMiddleware } from "../../middleware/auth.middleware";
+import { roleMiddleware } from "../../middleware/role.middleware";
 
 const router = Router();
 
@@ -13,6 +14,15 @@ router.post(
   authMiddleware,
   asyncHandler(
     controller.initializeBooking
+  )
+);
+
+router.get(
+  "/creator",
+  authMiddleware,
+  roleMiddleware("CREATOR"),
+  asyncHandler(
+    controller.creatorPayments
   )
 );
 

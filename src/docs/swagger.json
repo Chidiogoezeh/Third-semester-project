@@ -83,6 +83,12 @@
         }
       }
     },
+    "/api/v1/payments/creator": {
+      "get": {
+        "summary": "Get creator payment records",
+        "tags": ["Payments"]
+      }
+    },
     "/api/v1/payments/webhook": {
       "post": {
         "summary": "Paystack webhook endpoint",

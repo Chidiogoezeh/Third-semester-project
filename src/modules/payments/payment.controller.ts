@@ -22,6 +22,22 @@ export class PaymentController {
     );
   };
 
+  creatorPayments = async (
+    req: Request,
+    res: Response
+  ) => {
+    const result =
+      await service.getCreatorPayments(
+        req.user!.userId
+      );
+
+    return successResponse(
+      res,
+      "Payment records fetched",
+      result
+    );
+  };
+
   webhook = async (
     req: Request,
     res: Response
