@@ -103,6 +103,7 @@ export class AnalyticsService {
       });
 
     return {
+      totalEvents: events.length,
       revenue,
       ticketsSold,
       attendance,
