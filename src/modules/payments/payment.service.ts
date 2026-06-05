@@ -289,22 +289,27 @@ export class PaymentService {
     });
 }
     
+    try {
+      await notificationService.sendPaymentSuccessEmail({
+        email: payment.eventee.email,
+        eventTitle: payment.event.title,
+        amount: payment.amount
+      });
+    } catch (error) {
+      console.error("Payment email failed", error);
+    }
 
-    await notificationService.sendTicketEmail({
-      email:
-        payment.eventee.email,
-
-      eventTitle:
-        payment.event.title,
-
-      qrCode,
-
-      eventDate:
-        payment.event.eventDate,
-
-      location:
-        payment.event.location
-    });
+    try {
+      await notificationService.sendTicketEmail({
+        email: payment.eventee.email,
+        eventTitle: payment.event.title,
+        qrCode,
+        eventDate: payment.event.eventDate,
+        location: payment.event.location
+      });
+    } catch (error) {
+      console.error("Ticket email failed", error);
+    }
 
     return {
       ticket: result.ticket,
