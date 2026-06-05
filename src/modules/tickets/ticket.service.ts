@@ -2,6 +2,42 @@ import { AppError } from "../../shared/errors/appError";
 import { prisma } from "../../config/database";
 
 export class TicketService {
+
+  async getUserTickets(
+    eventeeId: string
+  ) {
+    return prisma.ticket.findMany({
+      where: {
+        eventeeId
+      },
+
+      include: {
+        event: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            location: true,
+            eventDate: true,
+            bannerUrl: true
+          }
+        },
+
+        payment: {
+          select: {
+            amount: true,
+            status: true,
+            paidAt: true
+          }
+        }
+      },
+
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+  }
+
   async verifyTicket(
     ticketToken: string,
     creatorId: string

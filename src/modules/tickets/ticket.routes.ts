@@ -10,6 +10,15 @@ const router = Router();
 
 const controller = new TicketController();
 
+router.get(
+  "/me",
+  authMiddleware,
+  roleMiddleware("EVENTEE"),
+  asyncHandler(
+    controller.myTickets
+  )
+);
+
 router.post(
   "/verify",
   authMiddleware,

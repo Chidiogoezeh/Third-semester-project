@@ -5,6 +5,23 @@ import { successResponse } from "../../shared/utils/response";
 const service = new TicketService();
 
 export class TicketController {
+
+  myTickets = async (
+    req: Request,
+    res: Response
+  ) => {
+    const result =
+      await service.getUserTickets(
+        req.user!.userId
+      );
+
+    return successResponse(
+      res,
+      "Tickets fetched successfully",
+      result
+    );
+  };
+
   verify = async (
     req: Request,
     res: Response
