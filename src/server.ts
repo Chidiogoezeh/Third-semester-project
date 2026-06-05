@@ -3,30 +3,39 @@ import app from "./app";
 import { env } from "./config/env";
 import { prisma } from "./config/database";
 import { logger } from "./shared/utils/logger";
+import { Server } from "http";
+
+let server: Server | null = null;
 
 async function bootstrap() {
-  try {
-    await prisma.$connect();
+  await prisma.$connect();
 
-    app.listen(env.PORT, () => {
-      logger.info(
-        `Server running on port ${env.PORT}`
-      );
-    });
-  } catch (error) {
-    logger.error(error);
-
-    process.exit(1);
-  }
+  server = app.listen(env.PORT, () => {
+    logger.info(
+      `Server running on port ${env.PORT}`
+    );
+  });
 }
 
-bootstrap();
+async function shutdown(signal: string) {
+  logger.info(
+    `Received ${signal}. Starting graceful shutdown...`
+  );
 
-async function shutdown() {
   try {
-    logger.info("Shutting down gracefully...");
+    if (server) {
+      await new Promise<void>((resolve, reject) =>
+        server!.close(err =>
+          err ? reject(err) : resolve()
+        )
+      );
+    }
 
     await prisma.$disconnect();
+
+    logger.info(
+      "Graceful shutdown completed"
+    );
 
     process.exit(0);
   } catch (error) {
@@ -36,5 +45,15 @@ async function shutdown() {
   }
 }
 
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
+bootstrap().catch(error => {
+  logger.error(error);
+  process.exit(1);
+});
+
+process.on("SIGINT", () =>
+  shutdown("SIGINT")
+);
+
+process.on("SIGTERM", () =>
+  shutdown("SIGTERM")
+);
