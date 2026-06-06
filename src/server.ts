@@ -4,6 +4,7 @@ import { env } from "./config/env";
 import { prisma } from "./config/database";
 import { logger } from "./shared/utils/logger";
 import { Server } from "http";
+import { reminderWorker } from "./modules/reminders/reminder.worker";
 
 let server: Server | null = null;
 
@@ -29,6 +30,10 @@ async function shutdown(signal: string) {
           err ? reject(err) : resolve()
         )
       );
+    }
+
+    if (reminderWorker) {
+      await reminderWorker.close();
     }
 
     await prisma.$disconnect();

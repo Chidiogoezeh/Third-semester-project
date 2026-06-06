@@ -18,22 +18,23 @@ export const reminderQueue =
       })
     : null;
 
-if (redisConnection) {
-  new Worker(
-    "event-reminders",
-    async job => {
-      const notification =
-        new NotificationService();
+export const reminderWorker =
+  redisConnection
+    ? new Worker(
+        "event-reminders",
+        async job => {
+          const notification =
+            new NotificationService();
 
-      await notification.sendReminderEmail(
-        job.data
-      );
-    },
-    {
-      connection: redisConnection
-    }
-  );
-}
+          await notification.sendReminderEmail(
+            job.data
+          );
+        },
+        {
+          connection: redisConnection
+        }
+      )
+    : null;
 
 export async function scheduleReminder(data: {
   reminderId: string;
