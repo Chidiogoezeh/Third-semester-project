@@ -13,8 +13,8 @@
   },
   "include": [
     "src",
-    "tests"
-  ],
+    "tests",
+    "server.ts"  ],
   "exclude": [
     "node_modules",
     "dist"

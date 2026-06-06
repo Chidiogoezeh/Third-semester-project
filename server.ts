@@ -1,10 +1,10 @@
-import "./modules/reminders/reminder.worker";
-import app from "./app";
-import { env } from "./config/env";
-import { prisma } from "./config/database";
-import { logger } from "./shared/utils/logger";
+import "./src/modules/reminders/reminder.worker";
+import app from "./src/app";
+import { env } from "./src/config/env";
+import { prisma } from "./src/config/database";
+import { logger } from "./src/shared/utils/logger";
 import { Server } from "http";
-import { reminderWorker } from "./modules/reminders/reminder.worker";
+import { reminderWorker } from "./src/modules/reminders/reminder.worker";
 
 let server: Server | null = null;
 
