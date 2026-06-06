@@ -9,7 +9,7 @@ services:
       npx prisma migrate deploy
       npm run build
 
-    startCommand: npm run start
+    startCommand: node dist/src/server.js
 
     envVars:
       - key: NODE_VERSION
