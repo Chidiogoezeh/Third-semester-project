@@ -14,3 +14,12 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 22
+
+      - key: NODE_ENV
+        value: production
+
+      - key: JWT_EXPIRES_IN
+        value: 1d
+
+      - key: BCRYPT_SALT_ROUNDS
+        value: 12
