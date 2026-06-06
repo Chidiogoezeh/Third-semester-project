@@ -16,7 +16,12 @@ export class UserService {
       );
     }
 
-    return user;
+    const {
+      password,
+      ...safeUser
+    } = user;
+
+    return safeUser;
   }
 
   async updateProfile(
@@ -57,11 +62,19 @@ export class UserService {
       }
     }
 
-    return prisma.user.update({
-      where: {
-        id
-      },
-      data
-    });
+    const updatedUser =
+      await prisma.user.update({
+        where: {
+          id
+        },
+        data
+      });
+
+    const {
+      password,
+      ...safeUser
+    } = updatedUser;
+
+    return safeUser;
   }
 }
