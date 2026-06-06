@@ -5,17 +5,31 @@ import { redis } from "../../config/redis";
 import { prisma } from "../../config/database";
 
 export class EventService {
-  private async invalidateEventCaches(
-    slug?: string
-  ) {
+  private async invalidateEventCaches() {
     if (!redis) return;
 
-    const keys = await redis.keys("event*");
+    let cursor = "0";
+    const keysToDelete: string[] = [];
 
-    if (keys.length) {
-      await redis.del(...keys);
+    do {
+      const [nextCursor, keys] =
+        await redis.scan(
+          cursor,
+          "MATCH",
+          "event*",
+          "COUNT",
+          100
+        );
+
+      cursor = nextCursor;
+
+      keysToDelete.push(...keys);
+    } while (cursor !== "0");
+
+    if (keysToDelete.length > 0) {
+      await redis.del(...keysToDelete);
     }
-      }
+  }
 
   async createEvent(
     creatorId: string,
@@ -258,9 +272,7 @@ export class EventService {
         }
       });
 
-    await this.invalidateEventCaches(
-      event.slug
-    );
+    await this.invalidateEventCaches();
 
     return updated;
   }
@@ -292,9 +304,7 @@ export class EventService {
       }
     });
 
-    await this.invalidateEventCaches(
-      event.slug
-    );
+    await this.invalidateEventCaches();
 
     return null;
   }
