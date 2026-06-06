@@ -5,6 +5,7 @@ import { AppError } from "../../shared/errors/appError";
 import {  generateQRCode } from "../../shared/utils/qr";
 import { PaystackService } from "./paystack.service";
 import { scheduleReminder } from "../reminders/reminder.worker";
+import { logger } from "../../shared/utils/logger";
 
 const notificationService = new NotificationService();
 
@@ -331,7 +332,7 @@ export class PaymentService {
         amount: payment.amount
       });
     } catch (error) {
-      console.error("Payment email failed", error);
+      logger.error(error, "Payment email failed");
     }
 
     try {
@@ -343,7 +344,7 @@ export class PaymentService {
         location: payment.event.location
       });
     } catch (error) {
-      console.error("Ticket email failed", error);
+      logger.error(error, "Payment email failed");
     }
 
     return {
