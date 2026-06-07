@@ -1,124 +1,99 @@
 # Eventful Backend
 
-A scalable event management and ticketing platform built with **Node.js**, **TypeScript**, and **Express.js**. Eventful enables creators to manage events, sell tickets, verify attendance through QR codes, send reminders, process payments, and monitor event performance through analytics.
-
----
+Eventful is an event management and ticketing API built with Node.js, TypeScript, Express, PostgreSQL, and Prisma. The platform enables event creators to publish events, manage attendees, sell tickets, verify attendance through QR codes, automate reminders, process payments via Paystack, and track event performance through analytics.
 
 ## Tech Stack
 
-| Layer           | Technology        |
-| --------------- | ----------------- |
-| Runtime         | Node.js           |
-| Language        | TypeScript        |
-| Framework       | Express.js        |
-| Database        | PostgreSQL        |
-| ORM             | Prisma            |
-| Cache           | Redis             |
-| Authentication  | JWT, bcrypt       |
-| Payments        | Paystack          |
-| Background Jobs | BullMQ            |
-| Testing         | Jest, Supertest   |
-| Documentation   | Swagger / Postman |
-
----
+- Node.js
+- TypeScript
+- Express.js
+- PostgreSQL
+- Prisma ORM
+- Redis
+- BullMQ
+- JWT Authentication
+- Paystack
+- Nodemailer
+- Jest and Supertest
+- Swagger
 
 ## Features
 
 ### Authentication & Authorization
 
 - User registration and login
-- JWT authentication
-- Role-Based Access Control (RBAC)
+- JWT-based authentication
+- Role-based access control (RBAC)
 
 **Roles**
 
-- **Creator** – Creates and manages events
-- **Eventee** – Discovers events and purchases tickets
+- Creator
+- Eventee
 
 ### Event Management
 
 Creators can:
 
 - Create, update, and delete events
-- View attendees
-- Access analytics and payment records
+- Manage attendees
+- Configure reminder schedules
+- View analytics and revenue metrics
 
 Eventees can:
 
-- Browse and search events
+- Browse public events
+- Search events
 - View event details
 - Purchase tickets
 
-### Ticketing & Verification
+### Ticketing
 
-- Ticket purchase workflow
-- QR code generation
-- Digital ticket issuance
-- QR-based attendance verification
+- QR-code ticket generation
+- Secure ticket tokens
+- Attendance verification
 - Duplicate scan prevention
+- User ticket history
 
 ### Payments
 
-- Paystack integration
-- Payment initialization and verification
-- Webhook handling
-- Automatic ticket generation after successful payment
+- Paystack payment integration
+- Checkout session initialization
+- Webhook verification
+- Automatic ticket issuance after payment success
 
-### Reminders & Notifications
+### Notifications
 
-- Creator-configured reminders
-- User reminder preferences
-- Scheduled event notifications
-- Queue-based background processing
-
-### Event Sharing
-
-- Public event pages (`/events/:slug`)
-- Social sharing support for:
-  - WhatsApp
-  - Facebook
-  - X (Twitter)
-  - LinkedIn
+- Email ticket delivery
+- Payment confirmations
+- Scheduled event reminders
+- Queue-based background processing with BullMQ
 
 ### Analytics
 
-Creators can view:
+Creator dashboard includes:
 
-- Total events created
+- Total events
+- Revenue
 - Tickets sold
-- Total attendees
-- Event-specific attendance metrics
-- Scanned ticket statistics
-
----
+- Attendance metrics
+- Scan rates
+- Event-level performance breakdowns
 
 ## Architecture
 
-```text
 Client
-   │
-   ▼
+│
+▼
 Express API
-   │
-   ├── PostgreSQL (Prisma)
-   ├── Redis Cache
-   ├── BullMQ Workers
-   └── Paystack
-```
+│
+├── PostgreSQL (Prisma)
+├── Redis Cache
+├── BullMQ Workers
+├── Paystack
+└── Email Service
 
-### Design Principles
+## API Modules
 
-- Layered Architecture
-- Separation of Concerns
-- Service-Oriented Modules
-- Queue-Based Processing
-- Maintainable TypeScript Codebase
-
----
-
-## Core Modules
-
-```text
 Auth
 Users
 Events
@@ -127,122 +102,94 @@ Payments
 Reminders
 Analytics
 Notifications
-```
-
----
-
-## Payment Flow
-
-```text
-Book Ticket
-    │
-    ▼
-Initialize Paystack Payment
-    │
-    ▼
-Payment Success
-    │
-    ▼
-Verify Transaction
-    │
-    ▼
-Generate Ticket
-    │
-    ▼
-Generate QR Code
-    │
-    ▼
-Schedule Reminders
-```
-
----
 
 ## Security
 
 - JWT Authentication
 - bcrypt Password Hashing
-- Input Validation
-- Protected Routes
-- Basic Rate Limiting
+- Zod Validation
+- Rate Limiting
 - CORS Protection
-- Webhook Signature Verification
+- Helmet Security Headers
+- Paystack Webhook Signature Verification
 
----
+## Main Endpoints
 
-## API Overview
+http
+POST /api/v1/auth/register
+POST /api/v1/auth/login
 
-### Authentication
+GET /api/v1/events
+GET /api/v1/events/:slug
+POST /api/v1/events
+PATCH /api/v1/events/:id
+DELETE /api/v1/events/:id
 
-```http
-POST /auth/register
-POST /auth/login
-```
+POST /api/v1/events/:id/book
 
-### Events
+GET /api/v1/tickets/me
+POST /api/v1/tickets/verify
 
-```http
-GET    /events
-GET    /events/:id
-POST   /events
-PATCH  /events/:id
-DELETE /events/:id
-```
+POST /api/v1/events/:id/reminders
 
-### Tickets
+GET /api/v1/payments/creator
+POST /api/v1/payments/webhook
 
-```http
-POST /events/:id/book
-POST /tickets/verify
-```
+GET /api/v1/analytics/dashboard
 
-### Reminders
+GET /api/v1/users/me
+PATCH /api/v1/users/me
 
-```http
-POST /events/:id/reminders
-```
+## Development
 
-### Analytics
+bash
 
-```http
-GET /analytics
-```
+# Install dependencies
 
----
+npm install
+
+# Generate Prisma client
+
+npm run prisma:generate
+
+# Run migrations
+
+npm run prisma:migrate
+
+# Start development server
+
+npm run dev
+
+# Run tests
+
+npm test
+
+# Build production
+
+npm run build
+
+## Environment Variables
+
+env
+DATABASE_URL=
+JWT_SECRET=
+PAYSTACK_SECRET_KEY=
+REDIS_URL=
+CLIENT_URL=
+
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=
 
 ## Testing
 
-### Unit Tests
-
-- Services
-- Utility Functions
-
-### Integration Tests
-
-- Authentication Flow
-- Event Management Flow
-- Ticket Booking Flow
-- Payment Flow
-
-Tools:
-
+- Unit Tests (Services & Utilities)
+- Integration Tests (API Endpoints)
 - Jest
 - Supertest
 
----
+## License
 
-## Project Objective
-
-Eventful demonstrates a production-inspired backend architecture that combines:
-
-- Authentication & Authorization
-- Event Management
-- Ticket Purchasing
-- QR Code Generation & Verification
-- Paystack Payments
-- Reminder Notifications
-- Event Analytics
-- Redis Caching
-- Rate Limiting
-- API Testing & Documentation
-
-Built as a capstone project to showcase scalable backend engineering practices using the Node.js ecosystem.
+MIT
